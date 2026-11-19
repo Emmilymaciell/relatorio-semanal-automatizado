@@ -93,7 +93,7 @@ Microsoft Word apenas para a etapa DOCX→PDF.
 
 ```bash
 # testes que não dependem do acervo real (configuração + fixtures sintéticas em tempdir);
-# não reexecutados na preparação desta versão pública — ver RELATORIO de sanitização
+# rodada de 19/11/2026: 8 OK, 20 SKIP (guarda de dado real), 0 falha — ver "Verificação" abaixo
 python tests/test_config_integridade.py
 python tests/test_gates_genericos.py
 python tests/test_multiobra_r1.py
@@ -124,6 +124,13 @@ não acompanham este repositório.
 
 Python 3.12 · python-docx · PyMuPDF · openpyxl · PyYAML · Pillow · reportlab · lxml ·
 pywin32 (Word COM) · Claude Code.
+
+## Verificação, sanitização e licença
+
+- **Testes:** cada `tests/test_*.py` executado como script → **8 OK, 20 SKIP** (guarda de dado real), 0 falha, em 19/11/2026; `test_docx_to_pdf.py` não foi rodado (exige Word).
+- **Dados:** fictícios — cópia sanitizada de um sistema em uso real; nenhum dado de cliente ou de terceiro.
+- **Sanitização:** o que foi removido, trocado ou inventado nesta cópia está em [`SANITIZACAO.md`](SANITIZACAO.md).
+- **Licença:** todos os direitos reservados; leitura permitida para avaliação de portfólio — ver [`LICENSE`](LICENSE) e [`NOTICE`](NOTICE).
 
 ---
 
