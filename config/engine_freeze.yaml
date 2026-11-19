@@ -1,0 +1,44 @@
+# ENGINE_FREEZE_FOR_MULTIROAD
+#
+# A partir deste freeze, o motor NAO e' alterado para fazer uma obra especifica parecer
+# com o golden. Diferenca legitima de obra entra por config (road_registry,
+# source_layout, services_taxonomy, textos_v3), nunca por `if obra == ...`.
+#
+# Unica janela de alteracao do motor depois do freeze: a rodada global `multiobra-r1`,
+# restrita a divergencias classificadas como GLOBAL_ENGINE_BUG na triagem multiobra
+# (docs/RELEASE_CRITERIA.md) — com evidencia em mais de uma obra ou erro inequivoco.
+
+estado: ENGINE_FREEZE_FOR_MULTIROAD
+data: 2026-10-04
+commit_base: acee294        # motor v0.3 + fix do titulo do grafico de NC
+tag: engine-freeze-mr0
+caso_de_referencia:
+  obra: RD103
+  periodo: [2026-08-29, 2026-09-04]
+  versao: v0.3
+  validador: "15/15 PASS"
+  critical_gates: "12/12 PASS"
+  regressoes: 0
+  shadow_error: 0
+  global_engine_bug_conhecido: 0
+
+caminhos_congelados:
+  - scripts/gerador/
+  - scripts/shadow_report.py
+  - scripts/montar_pdf_final.py
+  - scripts/validar_relatorio_semanal.py
+  - scripts/21_regression_guard.py
+
+caminhos_livres:            # podem mudar sem quebrar o freeze
+  - config/road_registry.yaml
+  - config/source_layout.yaml
+  - config/services_taxonomy.yaml
+  - config/textos_v3.yaml
+  - config/regression_exceptions.yaml
+  - scripts/generate.py      # orquestracao por cima do motor
+  - docs/
+  - tests/
+
+rodadas_permitidas:
+  - id: multiobra-r1
+    escopo: GLOBAL_ENGINE_BUG + LEGITIMATE_ROAD_CONFIG da triagem multiobra

@@ -1,0 +1,73 @@
+# --- Office / Windows / OneDrive ---
+~$*
+*.tmp
+.~lock.*
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# --- Area de trabalho temporaria ---
+# tmp/ guarda COPIAS de arquivos do SharePoint (podem passar de 70 MB).
+# Nunca versionar: sao dados originais do contrato, nao codigo.
+/tmp/
+/scratch/
+
+# --- Saidas pesadas ---
+# Texto e JSON de analise SAO versionados; binarios extraidos nao.
+/output/evidencias/**/*.png
+/output/evidencias/**/*.jpg
+/output/evidencias/**/*.jpeg
+/output/evidencias/**/*.emf
+/output/evidencias/**/*.wmf
+/output/evidencias/**/*.pdf
+/output/evidencias/**/*.docx
+/output/evidencias/**/*.xlsx
+/output/**/*.zip
+
+# --- Logs ---
+*.log
+/logs/*.jsonl
+
+# --- Artefatos binarios gerados pelo pipeline (Fase 3.3) ---
+# O DOCX do candidate e os PNGs das figuras embutem FOTOGRAFIAS DA OBRA e paginas
+# de pareceres -- sao dados do contrato, pela mesma razao que /tmp/ nao e
+# versionado. Alem disso sao DERIVADOS: `shadow_report.py candidate` os reproduz a
+# partir das fontes, e o candidate_manifest_vX.json guarda os sha1 de origem e de
+# configuracao para provar qual versao gerou qual arquivo.
+# O que FICA versionado: manifest, assembly_plan, comparison, scorecard e os
+# report_data/provenance -- que sao o que permite medir v0.1 -> v0.2.
+output/shadow/**/figuras/
+output/shadow/**/anexos_embutidos/
+output/shadow/**/*.docx
+output/shadow/**/*.pdf
+output/visual_review/golden/
+output/visual_review/shadow/
+
+# --- Paginas renderizadas dos candidates (scripts/19_extrair_paginas_candidate.py) ---
+# 150 dpi de cada pagina do PDF montado: embutem FOTOGRAFIAS DA OBRA e paginas de
+# pareceres, pela mesma razao que o DOCX do candidate nao e versionado. Sao derivadas
+# -- o script as reproduz do PDF montado a qualquer momento.
+# O formatos_paginas.json de cada versao FICA: e texto, e e o insumo do alinhamento
+# de paginas do delta.
+# As paginas da v0.1 ja estavam rastreadas antes desta regra e seguem assim (o
+# .gitignore nao desrastreia): a v0.1 e baseline aprovada e nao se mexe nela.
+output/visual_review/candidate_*/*.png
+
+# --- worktrees das frentes paralelas (harness) ---
+.claude/worktrees/
+
+# --- extracao bruta, cache e paginas renderizadas com dado de terceiro ficam fora do Git.
+/output/extracao/
+/output/inventarios/_historico_parcial.jsonl
+/output/visual_review/candidate_v0.1/
+
+# --- versao publica: dados reais nao existem neste repositorio ---
+/output/
+/state/

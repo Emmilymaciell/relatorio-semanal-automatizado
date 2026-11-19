@@ -1,0 +1,176 @@
+# =============================================================================
+# comparison_rules.yaml — casos conhecidos de divergência Shadow × Golden e sua
+# classificação (spec Fase 3 Slice 3, Sec.6).
+#
+# `scripts/gerador/compare.py` é a ÚNICA camada autorizada a ler o golden, e só
+# para CLASSIFICAR diferenças (assert_nao_e_golden() continua valendo para
+# todo o resto do gerador).
+#
+# Cada regra tem `condicao`: uma expressão Python avaliada com as variáveis
+# `golden` e `shadow` (os dois valores concretos do item sendo comparado),
+# sem builtins. O comparador só aplica `classe` quando a condição bate nos
+# DADOS REAIS da execução — nunca é "regra cega" que classifica por id sozinho.
+# Se a condição não bater, o comparador cai no default (HITL_REQUIRED com
+# motivo "sem regra classificada" — nunca SHADOW_ERROR por omissão).
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-17
+  regra_geral: >
+    SHADOW_ERROR só é aplicado quando há evidência de que o Shadow está
+    errado. Toda diferença sem regra correspondente cai em HITL_REQUIRED,
+    nunca em SHADOW_ERROR silencioso.
+
+regras:
+
+  - id: clima-2026-09-01
+    eixo: data
+    campo: "climate.by_day[2026-09-01]"
+    classe: GOLDEN_DEFECT
+    condicao: "shadow == 'Chuvoso' and golden == 'Bom'"
+    evidencia: >
+      2026-09-01 Ficha de Campo RD 103.xlsx, aba FICHA CAMPO, X em O17 (Chuvoso);
+      mtime 2026-09-02 16:46, anterior à emissão do relatório em 2026-09-11 —
+      a fonte já dizia "Chuvoso" quando o relatório golden foi redigido.
+      Ver CHECKPOINT_3.1_DATA_PACKAGE.md §4.1: o dado do relatório oficial está
+      errado, o extrator está certo. Não deve ser "corrigido" para bater com o
+      golden.
+
+  - id: clima-dia-sem-ficha
+    eixo: data
+    campo: "climate.by_day[*]"
+    classe: HITL_REQUIRED
+    condicao: "shadow in ('INDETERMINADO', '-')"
+    evidencia: >
+      docs/mapeamento/T13_CLIMA_DIA_SEM_FICHA.md: 23 casos discriminantes no
+      regime vigente se repartem 48%/26%/26% entre 3 comportamentos (repetir o
+      dia anterior / escrever "-" / escrever "Bom") — nenhum domina, não há
+      regra determinística. Q-8 decide não adivinhar: o Shadow renderiza "-" e
+      marca o bloco HITL, nunca "Bom" nem repetição do dia anterior.
+
+  - id: servicos-sigla-equivalencia
+    eixo: text
+    campo: "services / s1_apresentacao / s4_unifilar"
+    classe: SEMANTICALLY_EQUIVALENT
+    condicao: "'OAE' in golden and 'Obras de Arte Especiais' in shadow and 'OAE' in shadow"
+    evidencia: >
+      Q-9 (FASE3_SLICE_3_SPEC.md §1): o golden usa a sigla ("OAE"), o Shadow usa
+      a forma completa na 1ª ocorrência ("Obras de Arte Especiais (OAE)") e a
+      sigla nas seguintes, por decisão da Emmily de nomenclatura completa/formal
+      (config/services_taxonomy.yaml, GUIA_DE_REDACAO.md §2.3). Mesmo fato,
+      redação deliberadamente diferente — não é erro.
+
+  - id: nc-historico-volatilidade
+    eixo: data
+    campo: "nonconformities.history_by_status[Encerrada|em_atraso]"
+    classe: SOURCE_LIMITATION
+    condicao: "golden != shadow"
+    evidencia: >
+      Entre duas execuções do MESMO código desta sessão, com uma hora de
+      diferença, a contagem de NC mudou: run 10:39 → Encerrada=22, Aberta=2,
+      Em Análise=2, Aguard. Proj. Exec.=6 (não-encerradas=10); run 11:3x →
+      Encerrada=25, Aberta=2, Em Análise=0, Aguard. Proj. Exec.=5
+      (não-encerradas=7); golden (emitido 11/09) → Encerrada="vinte e duas
+      (22)", em atraso="nove (09)". Causa VERIFICADA:
+      "02_Acompanhamento de NC automatizada.xlsm" foi alterada no SharePoint às
+      11:33 de 2026-09-17 (sha1/mtime do manifest.yaml). O código de contagem
+      (scripts/gerador/extratores/nc.py) não mudou nesse intervalo — só houve
+      inserções de linha na planilha-fonte. Isso é prova direta de que
+      `history_by_status` é volátil e NÃO reconstruível historicamente a partir
+      da Tbl_VISAO (que usa TODAY()) — classe SOURCE_LIMITATION, nunca
+      SHADOW_ERROR. Ver nonconformities.historical_reconstruction em
+      report_data.json (UNRECONSTRUCTABLE_FROM_CURRENT_SOURCE).
+
+  - id: termo-encerramento-placeholder
+    eixo: text
+    campo: "s10_termo_encerramento"
+    classe: EXPECTED_DIFFERENCE
+    condicao: "shadow != golden"
+    evidencia: >
+      FASE3_SLICE_3_SPEC.md §5 "Termo de Encerramento": a lógica completa
+      (contagem → extenso → frase) está implementada, mas o nº de páginas só é
+      conhecido após a montagem final do documento (anexos incluídos) —
+      Checkpoint 3.3. O Shadow marca PLACEHOLDER + n_paginas_provisorio=true e
+      NUNCA copia as 35 páginas do golden. Diferença deliberada desta iteração,
+      não erro.
+
+  - id: figura-placeholder
+    eixo: structure
+    campo: "figure_placeholder[*]"
+    classe: EXPECTED_DIFFERENCE
+    condicao: "'RENDERIZAÇÃO PENDENTE' in shadow"
+    evidencia: >
+      FASE3_SLICE_3_SPEC.md: "Fora de escopo: ... renderização real das
+      imagens". Toda imagem/gráfico do golden vira um placeholder textual na
+      posição estrutural correta nesta fatia — diferença deliberada, não
+      ausência de dado.
+
+  - id: interferencias-sem-precedente-rd103
+    eixo: section
+    campo: "s9_interferencias"
+    classe: HITL_REQUIRED
+    condicao: "shadow_status == 'HITL'"
+    evidencia: >
+      Q-10 (FASE3_SLICE_3_SPEC.md §1): ausência nas fontes consultadas não
+      prova operacionalmente que não houve interferência. A RD-103 nunca teve
+      um caso real na amostra (TEXTOS_E_TEMPLATES.md §4: "a RD-103 nunca teve
+      um"), mas o Shadow gera a frase negativa com automation_class=TPL e
+      validation_status=HITL — não copia a afirmação do golden como fato
+      comprovado pela fonte.
+
+  - id: contrato-assinado-em-nao-comprovado
+    eixo: data
+    campo: "contract.contrato_assinado_em"
+    classe: HITL_REQUIRED
+    condicao: "shadow is None"
+    evidencia: >
+      road_registry.yaml obras.RD103.contrato_provenance.contrato_assinado_em:
+      NOT_FOUND — o PDF do contrato (64 páginas) não tem um bloco de assinatura
+      textual extraível para o contrato em si (só para a Declaração de
+      Negociação anexa, documento distinto). Fica NOT_FOUND + HITL; não copiado
+      do golden (FASE3_SLICE_3_SPEC.md §3, regra invariável do §7).
+
+  - id: titulo-secao-51-padronizacao
+    eixo: section
+    campo: "s5_1_clima.titulo"
+    classe: SEMANTICALLY_EQUIVALENT
+    condicao: "'Dados climáticos' in golden and 'Condições climáticas' in shadow"
+    evidencia: >
+      road_registry.yaml obras.RD103.titulo_secao_5_1 = "Dados climáticos do
+      período:" — única das 4 obras com essa grafia (as outras 3 já usam
+      "Condições climáticas"). GUIA_DE_REDACAO.md R-04 e
+      PADRAO_ATUAL_RELATORIO_SEMANAL.md §2 padronizam o título para
+      "Condições climáticas do período" (sem dois-pontos, R-09) nas 4 obras —
+      mesmo bloco, redação corrigida deliberadamente.
+
+  # ⚠️ REVOGADA em 2026-09-17 (Q-12). A regra anterior classificava como
+  # SEMANTICALLY_EQUIVALENT o shadow escrever "RELATO DE RISCOS E INTERFERÊNCIAS
+  # EM CAMPO" onde o golden diz "RELATO DE INTERFERÊNCIA EM CAMPO". Isso estava
+  # errado: acrescentar "RISCOS" muda o ESCOPO declarado da seção, não a forma —
+  # ver a revisão da R-05 em docs/mapeamento/GUIA_DE_REDACAO.md.
+  # O título passou a vir de road_registry.titulo_secao_9, por obra, e o
+  # content_builder foi corrigido na Fase 3.2B. O v2 agora bate com o golden,
+  # então este caso classifica EXACT sozinho e não precisa de regra.
+  - id: titulo-secao9-singular-plural
+    eixo: section
+    campo: "s9_interferencias.titulo"
+    classe: SEMANTICALLY_EQUIVALENT
+    condicao: "golden.replace('INTERFERÊNCIAS','INTERFERÊNCIA') == shadow.replace('INTERFERÊNCIAS','INTERFERÊNCIA')"
+    evidencia: >
+      Padronização de singular/plural é FORMA e continua permitida
+      (GUIA_DE_REDACAO.md R-05 revisada). Acrescentar ou remover "RISCOS" é
+      ESCOPO e está proibido — se acontecer, não cai nesta regra e deve ser
+      classificado como CONTENT_SCOPE_DIFFERENCE.
+
+  - id: ambiental-numero-licenca-nao-extraido
+    eixo: text
+    campo: "s6_ambiental"
+    classe: HITL_REQUIRED
+    condicao: "shadow_status == 'HITL'"
+    evidencia: >
+      report_data.json → environment.kpis_status = MVP_LIMITATION: a
+      reconstrução do número da Licença Ambiental Única e do painel ambiental
+      está fora do orçamento desta fatia (ver scripts/12_analisar_ambiental.py).
+      O Shadow gera o parágrafo sem o número e marca HITL, em vez de inventar
+      ou copiar o número do golden.

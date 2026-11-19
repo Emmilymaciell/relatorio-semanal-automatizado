@@ -1,0 +1,486 @@
+# =============================================================================
+# services_taxonomy.yaml — taxonomia canônica de serviços e eventos
+#
+# Resolve P-06 e T-10. Aprovado pela Emmily: padronizar o vocabulário usando a
+# forma mais completa, tecnicamente correta, formal e profissional.
+#
+# BASE DOCUMENTAL:
+#   - legenda oficial da Ficha de Campo (colunas D/F, linhas 10–21), idêntica nas
+#     4 obras → CONFIRMADO POR EVIDÊNCIA DIRETA
+#   - 122 rótulos distintos levantados nas pastas `3. Fotos\<data>\<rótulo>\`
+#     (output/inventarios/rotulos_pastas_fotos.json)
+#   - abas do `RELATÓRIO FOTOGRÁFICO <nº>.xlsx`
+#   - subseções 5.2.x dos 8 relatórios da amostra
+#
+# REGRA: `canonical_name` é o nome oficial a ser usado na automação futura.
+# Os `aliases` são as grafias REAIS encontradas no acervo — servem para leitura,
+# nunca para escrita.
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-16
+  resolve: [P-06, T-10]
+  confianca_legenda: CONFIRMADO POR EVIDÊNCIA DIRETA
+  confianca_classificacao: FORTE INFERÊNCIA   # a classe de cada rótulo livre é inferida
+
+# -----------------------------------------------------------------------------
+# CLASSES — nem tudo que aparece como pasta de foto é serviço executado
+# -----------------------------------------------------------------------------
+classes:
+  SERVICE:        Serviço de execução da obra. Entra nas subseções 5.2.x.
+  QUALITY_CONTROL: Controle tecnológico — ensaios, laboratório, sondagem.
+  SURVEY:         Topografia e levantamentos.
+  ENVIRONMENTAL:  Meio ambiente. Alimenta a seção 6, não a 5.2.
+  SST:            Segurança e Saúde no Trabalho. Alimenta a seção 6.
+  MEETING:        Reunião. Gera anexo "Ata de Reunião", não subseção de serviço.
+  OCCURRENCE:     Ocorrência/evento anormal. Alimenta as seções 8 e 9.
+  ADMINISTRATIVE: Registro administrativo. Não entra no relatório.
+  AMBIGUOUS:      Rótulo cuja classe não pôde ser determinada com segurança.
+
+# -----------------------------------------------------------------------------
+# LEGENDA DA FICHA DE CAMPO — CONFIRMADO POR EVIDÊNCIA DIRETA
+# Fonte: `AAAA-MM-DD FICHA DE CAMPO.xlsx`, aba `FICHA CAMPO`, bloco
+#        "Serviços a serem registrados:" em D9, códigos em D10:D22, nomes em F.
+#
+# ⚠️ A LEGENDA É POR OBRA, NÃO ÚNICA. A lista antiga deste arquivo vinha só da
+#    RD-104 e estava incompleta (faltavam PSL e OAC). Corrigido em 2026-09-17 —
+#    ver docs/mapeamento/T17_P08_FECHAMENTO.md.
+# -----------------------------------------------------------------------------
+codigos_ficha_de_campo_por_obra:
+
+  RD101:      # FICHA CAMPO!D10:F22 — verificado nas semanas 47 e 48
+    COB: Canteiro de obras
+    LTE: Limpeza do Terreno
+    TER: Terraplenagem
+    PSL: Pavimentação sub leito
+    PSB: Pavimentação Sub-base
+    PBA: Pavimentação Base
+    REV: Pavimentação Revestimento
+    DRE: Drenagem
+    SIN: Sinalização
+    OAC: Obras de Arte Corrente      # D19/F19
+    OAE: Obras de Arte Especiais
+    AMB: Ambiental
+    CER: CERCA
+
+  RD102A:     # FICHA CAMPO!D10:F21 — verificado na semana 49
+    COB: Canteiro de obras
+    LTE: Limpeza do Terreno
+    TER: Terraplenagem
+    PSL: Pavimentação Sub leito
+    PSB: Pavimentação Sub-base
+    PBA: Pavimentação Base
+    REV: Pavimentação Revestimento
+    DRE: Drenagem
+    SIN: Sinalização
+    OAC: Obras de Arte Corrente      # D19/F19
+    OAE: Obras de Arte Especiais
+    AMB: Ambiental
+    # sem CER na legenda, mas CER É USADO na coluna Serviço (8 lançamentos,
+    # descrição "Cerca") — a legenda não é exaustiva do que se lança.
+    # `LAB` NÃO foi encontrado nesta amostra; a nota antiga "LAB presente apenas
+    # em RD-102A" fica NÃO CONFIRMADA.
+
+  RD103:      # FICHA CAMPO!D10:F22 — verificado nas semanas 48 e 49
+    COB: Canteiro de obras
+    LTE: Limpeza do Terreno
+    TER: Terraplenagem
+    PSL: Pavimentação sub leito
+    PSB: Pavimentação Sub-base
+    PBA: Pavimentação Base
+    REV: Pavimentação Revestimento
+    DRE: Drenagem
+    SIN: Sinalização
+    OAC: Obras de Arte Corrente      # D19/F19
+    OAE: Obras de Arte Especiais
+    AMB: Ambiental
+    CER: Cerca
+
+  RD104:      # FICHA CAMPO!D10:F19 — verificado nas semanas 42 e 43
+    COB: Canteiro de obras
+    LTE: Limpeza do Terreno
+    TER: Terraplenagem
+    PSB: Pavimentação Sub-base
+    PBA: Pavimentação Base
+    REV: Pavimentação Revestimento
+    DRE: Drenagem
+    SIN: Sinalização
+    OAE: OAE
+    AMB: Ambiental
+    # sem OAC e sem CER na legenda. Ver `desvios_de_codificacao` abaixo.
+
+# União dos códigos vistos em qualquer obra (uso apenas para validação de leitura)
+codigos_ficha_de_campo:
+  COB: Canteiro de obras
+  LTE: Limpeza do Terreno
+  TER: Terraplenagem
+  PSL: Pavimentação sub leito
+  PSB: Pavimentação Sub-base
+  PBA: Pavimentação Base
+  REV: Pavimentação Revestimento
+  DRE: Drenagem
+  SIN: Sinalização
+  OAC: Obras de Arte Corrente
+  OAE: Obras de Arte Especiais
+  AMB: Ambiental
+  CER: Cerca
+
+# -----------------------------------------------------------------------------
+# BLOCO OAC/OAE DEDICADO DA FICHA DE CAMPO — CONFIRMADO POR EVIDÊNCIA DIRETA
+# Além da tabela de serviços lineares, a ficha tem uma SEGUNDA tabela, presente
+# nas 4 obras, título literal:
+#   "OAC (Bueiro Tubular) / OAE (Bueiro Celular/Passagem de Fauna)"
+# Localização (varia por obra/semana): RD-101 B80/B89, RD-102A A80/B80,
+#   RD-103 A67/B67, RD-104 A76/A77 + B76/B77.
+# Colunas: Escavação | Corpo | Ala | Compactação | Observações, cada uma com
+#   situação A / C / - por bueiro. Linhas: estaca, tipo (BSTC/BDCC/BSCC/BTTC/
+#   BDTC/BTCC) e dimensão (Ø 0,60; 2,5x2,5; 3,0x3,0).
+# → OAC NÃO é apenas um código da coluna Serviço: tem estrutura própria.
+# -----------------------------------------------------------------------------
+bloco_oac_ficha_de_campo:
+  titulo: "OAC (Bueiro Tubular) / OAE (Bueiro Celular/Passagem de Fauna)"
+  presente_em: [RD101, RD102A, RD103, RD104]
+  etapas: [Escavação, Corpo, Ala, Compactação]
+  tipos_de_bueiro: [BSTC, BDTC, BTTC, BSCC, BDCC, BTCC]
+  confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+
+# -----------------------------------------------------------------------------
+# DESVIOS DE CODIFICAÇÃO — o código da coluna Serviço NÃO é confiável
+# Fonte: 7 fichas diárias da RD-104, 22/08 a 28/08/2026, cruzamento Q x K.
+# Evidência: output/evidencias/T17_P08_fichas_diarias_RD104_2026-08-22_2026-08-28.json
+# -----------------------------------------------------------------------------
+desvios_de_codificacao:
+  RD104:
+    - descricao: "Execução de OAC"
+      codigo_lancado: DRE
+      ocorrencias: 7
+      nota: "a obra não tem OAC na legenda; lança a atividade em DRE"
+    - descricao: "Execução de cerca / Execução de cercca / Remoção de cerca"
+      codigo_lancado: TER
+      ocorrencias: 5
+      nota: "vira a subseção 'Obras Complementares' no relatório"
+    - descricao: "Ensaio tecnológico"
+      codigo_lancado: TER
+      ocorrencias: 3
+    - descricao: "Aplicação de polimero / Preparo de polimero"
+      codigo_lancado: TER
+      ocorrencias: 3
+    - descricao: "Demolição da ponte existente"
+      codigo_lancado: [TER, DRE]
+      ocorrencias: 2
+      nota: "mesmo serviço em dois códigos diferentes na mesma semana"
+  regra: |
+    NÃO derivar a subseção 5.2.x do código da coluna Serviço. A coluna é
+    imprecisa e varia por obra. Derivar das abas do RELATÓRIO FOTOGRÁFICO.
+
+# -----------------------------------------------------------------------------
+# SITUAÇÃO — resolve P-04
+# Fonte: Ficha de Campo, N10:P12. CONFIRMADO POR FONTE HUMANA + EVIDÊNCIA DIRETA
+# -----------------------------------------------------------------------------
+situacao:
+  A:
+    canonical_name: Em andamento
+    descricao_ficha: "Em andamento"
+  C:
+    canonical_name: Concluído
+    descricao_ficha: "Concluido"        # sem acento no original
+  I:
+    canonical_name: Impedido
+    descricao_ficha: "Impedido (descrever impedimento)"
+    exige_descricao: true
+
+impedimentos_previstos:      # lista de exemplos da própria ficha (AK10:AK16)
+  - Desapropriação
+  - Rede de gás/esgoto/elétrica
+  - Ausência de Licença
+  - Ambiental
+
+# -----------------------------------------------------------------------------
+# TAXONOMIA
+# -----------------------------------------------------------------------------
+servicos:
+
+  CANTEIRO_DE_OBRAS:
+    canonical_name: "Canteiro de Obras"
+    classe: SERVICE
+    codigo_ficha: COB
+    aliases: ["Canteiro", "Canteiro de Obras", "Canteiro de obras", "COB",
+              "Canteiro de obras - supervisora", "Canteiro de obras - Construtora EXA",
+              "Vivência"]
+
+  LIMPEZA_DO_TERRENO:
+    canonical_name: "Limpeza do Terreno"
+    classe: SERVICE
+    codigo_ficha: LTE
+    aliases: ["Limpeza", "LTE", "Limpeza do Terreno"]
+
+  TERRAPLENAGEM:
+    canonical_name: "Terraplenagem"
+    classe: SERVICE
+    codigo_ficha: TER
+    aliases: ["Terraplenagem", "TERRAPLANAGEM", "Terraplanagem", "TER",
+              "Solo mole", "Carregamento"]
+    nota: "'Terraplanagem' (com A) é erro ortográfico recorrente no acervo."
+
+  ESCAVACAO_EM_ROCHA:
+    canonical_name: "Escavação em Rocha"
+    classe: SERVICE
+    codigo_ficha: TER
+    aliases: ["Detonação", "Perfuração rocha", "Perfuração"]
+    confianca: HIPÓTESE
+    nota: "Agrupado sob Terraplenagem por inferência; confirmar com a Ficha de Campo."
+
+  PAVIMENTACAO:
+    canonical_name: "Pavimentação"
+    classe: SERVICE
+    codigo_ficha: [PSB, PBA, REV]
+    aliases: ["Pavimentação", "Sub-base", "PSB", "PBA", "REV"]
+    subtipos:
+      PSB: "Pavimentação — Sub-base"
+      PBA: "Pavimentação — Base"
+      REV: "Pavimentação — Revestimento"
+    nota: "O relatório usa 'Pavimentação' agregado; a ficha distingue as 3 camadas."
+
+  DRENAGEM:
+    canonical_name: "Drenagem"
+    classe: SERVICE
+    codigo_ficha: DRE
+    aliases: ["Drenagem", "DRE", "DRENO"]
+
+  SINALIZACAO:
+    canonical_name: "Sinalização"
+    classe: SERVICE
+    codigo_ficha: SIN
+    aliases: ["Sinalização", "SIN"]
+
+  OBRAS_DE_ARTE_ESPECIAIS:
+    canonical_name: "Obras de Arte Especiais"
+    sigla: OAE
+    classe: SERVICE
+    codigo_ficha: OAE
+    aliases: ["OAE", "OAE:", "Obras de Arte Especiais", "Demolição OAE",
+              "Demolição Ponte"]
+
+  OBRAS_DE_ARTE_CORRENTE:
+    canonical_name: "Obras de Arte Corrente"
+    sigla: OAC
+    classe: SERVICE
+    # T-17 RESOLVIDA em 2026-09-17 — ver docs/mapeamento/T17_P08_FECHAMENTO.md
+    codigo_ficha_por_obra:
+      RD101: OAC            # está na legenda: FICHA CAMPO!D19/F19
+      RD102A: OAC           # idem
+      RD103: OAC            # idem
+      RD104: DRE            # sem OAC na legenda; lançado como DRE (7/7)
+    bloco_dedicado_na_ficha: true   # ver `bloco_oac_ficha_de_campo`
+    origem_da_subsecao_5_2: aba_relatorio_fotografico
+    titulos_editoriais: ["OAC", "Obras de Arte Corrente", "Obras de arte corrente"]
+    confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+    aliases: ["OAC", "OAC:", "Obras de arte corrente", "Obras de Arte Corrente",
+              "Obra de Arte Corrente"]
+
+  OBRAS_COMPLEMENTARES:
+    canonical_name: "Obras Complementares"
+    classe: SERVICE
+    codigo_ficha: CER
+    # T-17 RESOLVIDA — NÃO existe na ficha (nem legenda nem bloco). É nome
+    # editorial do relatório. Na coluna Serviço aparece como:
+    codigo_ficha_por_obra:
+      RD101: CER
+      RD102A: CER
+      RD103: CER
+      RD104: TER            # "Execução de cerca"/"Remoção de cerca" → TER
+    origem_da_subsecao_5_2: aba_relatorio_fotografico
+    titulos_editoriais: ["Obras Complementares", "Serviços Complementares"]
+    confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+    aliases: ["Obras Complementares", "Obras complementares", "Obra complementares",
+              "Cerca", "CER", "Remoção cerca", "Poste"]
+
+  CONSERVACAO_DO_TRECHO:
+    canonical_name: "Conservação do Trecho"
+    classe: SERVICE
+    codigo_ficha: null
+    aliases: ["Conservação do trecho", "Conservação do Trecho"]
+    nota: "69 ocorrências em pasta de foto, nas 4 obras; nunca virou subseção 5.2.x na amostra."
+
+  DESVIO_DE_TRAFEGO:
+    canonical_name: "Desvio de Tráfego"
+    classe: SERVICE
+    codigo_ficha: null
+    aliases: ["Desvio"]
+    confianca: HIPÓTESE
+
+  INTERFERENCIA_ADUTORA:
+    canonical_name: "Interferência — Adutora"
+    classe: OCCURRENCE
+    aliases: ["Adutora", "Escavação Adutora"]
+    confianca: HIPÓTESE
+    nota: "Provável interferência de rede — alimentaria a seção 9, não a 5.2."
+
+controle_tecnologico:
+
+  CONTROLE_TECNOLOGICO:
+    canonical_name: "Controle Tecnológico"
+    classe: QUALITY_CONTROL
+    codigo_ficha: null
+    nota_codigo: >
+      `LAB` constava como código da RD-102A na primeira leitura, mas NÃO foi
+      reencontrado na re-verificação por obra (2026-09-17). Fica NÃO CONFIRMADO.
+      Na RD-104, "Ensaio tecnológico" é lançado sob `TER` — ver desvios_de_codificacao.
+    aliases: ["Laboratório", "LAB", "Corpo de prova", "Ensaio", "Ensaio in situ",
+              "Ensaio sondagem", "Sondagem", "Segregação",
+              "Certificado ensaio de viga  BENKELMAN"]
+
+topografia:
+
+  SERVICOS_TOPOGRAFICOS:
+    canonical_name: "Serviços Topográficos"
+    classe: SURVEY
+    aliases: ["Topografia", "Serviços topográficos", "Marcos Topográficos",
+              "Levantamento de marcos topográficos",
+              "Levantamento de Marcos Topográficos"]
+
+meio_ambiente_e_sst:
+
+  ACOMPANHAMENTO_AMBIENTAL:
+    canonical_name: "Acompanhamento Ambiental"
+    classe: ENVIRONMENTAL
+    codigo_ficha: AMB
+    aliases: ["Ambiental", "AMB", "Supressão vegetal", "SUPRESSAO", "MEIO AMBIENTE"]
+    destino_no_relatorio: "seção 6"
+
+  SEGURANCA_E_SAUDE_NO_TRABALHO:
+    canonical_name: "Segurança e Saúde no Trabalho"
+    sigla: SST
+    classe: SST
+    aliases: ["SST", "DDS", "Canteiro - DDS"]
+    destino_no_relatorio: "seção 6"
+
+  SST_E_AMBIENTAL:
+    canonical_name: "Segurança e Saúde no Trabalho e Meio Ambiente"
+    classe: SST
+    aliases: ["SST e Ambiental"]
+    nota: "Rótulo misto; deve ser desmembrado na ingestão."
+
+eventos:
+
+  REUNIAO:
+    canonical_name: "Reunião de Alinhamento de Obra"
+    classe: MEETING
+    aliases: ["Reunião", "Reunião semanal"]
+    destino_no_relatorio: "seção 1 (parágrafo de reuniões) + anexo Ata de Reunião"
+
+  ACIDENTE:
+    canonical_name: "Acidente"
+    classe: OCCURRENCE
+    aliases: ["Acidente"]
+    destino_no_relatorio: "seção 9"
+    confianca: HIPÓTESE
+
+  CONDICAO_CLIMATICA_ADVERSA:
+    canonical_name: "Condição Climática Adversa"
+    classe: OCCURRENCE
+    aliases: ["Chuva"]
+    destino_no_relatorio: "seção 5.1 (linha CLIMA)"
+
+  INTERFERENCIA_EM_CAMPO:
+    canonical_name: "Interferência em Campo"
+    classe: OCCURRENCE
+    aliases: ["Interferências", "Terraplenagem - iluminação precária"]
+    destino_no_relatorio: "seção 9"
+
+  REGISTRO_ADMINISTRATIVO:
+    canonical_name: "Registro Administrativo"
+    classe: ADMINISTRATIVE
+    aliases: ["Administrativo", "Administração", "ADM"]
+    destino_no_relatorio: nenhum
+
+# -----------------------------------------------------------------------------
+# ABAS DO RELATÓRIO FOTOGRÁFICO — mapeamento para a taxonomia
+# -----------------------------------------------------------------------------
+# REGRA DE SELEÇÃO — CONFIRMADO POR CRUZAMENTO DE FONTES (T-17, 2026-09-17)
+# Uma aba vira subseção 5.2.x se, e somente se, `estado == "visible"` E tem ao
+# menos uma foto (`celulas_com_imagem_na_celula` não vazio). Bate em 8/8 semanas
+# e 4/4 obras, 33 pares, 0 divergências. Aba oculta nunca vira subseção; aba
+# visível com 0 fotos também não (ex.: RD-103 nº 48/49, aba OAC visível/0 fotos).
+# Comparar nomes de aba SEMPRE normalizados (sem acento, minúsculo, sem ponto
+# final) — o nome varia em maiúsculas, acentos e ponto final entre semanas.
+abas_relatorio_fotografico:
+  CAPA: {classe: null, nota: "cabeçalho canônico; nº em AB2, período em AB4"}
+  TERRAPLENAGEM: TERRAPLENAGEM
+  Terraplenagem: TERRAPLENAGEM
+  PAVIMENTAÇÃO: PAVIMENTACAO
+  "PAVIMENTAÇÃO.": PAVIMENTACAO
+  "Pavimentação.": PAVIMENTACAO
+  DRENAGEM: DRENAGEM
+  "DRENAGEM.": DRENAGEM
+  "Drenagem.": DRENAGEM
+  OAC: OBRAS_DE_ARTE_CORRENTE
+  OAE: OBRAS_DE_ARTE_ESPECIAIS
+  "OAE.": OBRAS_DE_ARTE_ESPECIAIS
+  OBRAS COMPLEMENTARES: OBRAS_COMPLEMENTARES
+  Serviços Complementares: OBRAS_COMPLEMENTARES   # RD-102A usa este nome
+  CONSERVAÇÃO: CONSERVACAO_DO_TRECHO
+  Conservação: CONSERVACAO_DO_TRECHO
+  MEIO AMBIENTE: ACOMPANHAMENTO_AMBIENTAL
+  ADM: REGISTRO_ADMINISTRATIVO
+  AVANÇO_GERAL: {classe: null, nota: "sempre oculta; nunca vira subseção"}
+
+# -----------------------------------------------------------------------------
+# ORDEM CANÔNICA das subseções 5.2.x
+# Derivada da ordem observada nos 8 relatórios da amostra. FORTE INFERÊNCIA —
+# a ordem varia entre obras e não foi possível provar uma regra única.
+# -----------------------------------------------------------------------------
+ordem_subsecoes_5_2:
+  - TERRAPLENAGEM
+  - PAVIMENTACAO
+  - OBRAS_DE_ARTE_ESPECIAIS
+  - OBRAS_DE_ARTE_CORRENTE
+  - DRENAGEM
+  - OBRAS_COMPLEMENTARES
+
+# -----------------------------------------------------------------------------
+# PENDÊNCIAS ABERTAS DESTA TAXONOMIA
+# -----------------------------------------------------------------------------
+pendencias:
+  T-17:
+    status: RESOLVIDA
+    resolvida_em: "2026-09-17"
+    documento: docs/mapeamento/T17_P08_FECHAMENTO.md
+    pergunta: "OAC e Obras Complementares não constam da legenda da Ficha de Campo,
+               mas são subseções do relatório. Descobrir sob qual código são
+               registrados."
+    conclusao: |
+      A pergunta partia de uma premissa errada: a legenda registrada aqui vinha
+      só da RD-104. Resultado em três partes:
+
+      (1) As subseções 5.2.x NÃO nascem da coluna Serviço da ficha. Nascem das
+          ABAS VISÍVEIS E COM FOTO do RELATÓRIO FOTOGRÁFICO <nº>.xlsx, que por
+          sua vez espelham os rótulos das pastas 3. Fotos\<AA-MM-DD>\<rótulo>\.
+          Bate em 8/8 semanas, 4/4 obras, 33 pares aba↔subseção, 0 divergências.
+          Aba oculta nunca vira subseção; aba visível com 0 fotos também não.
+          → hipótese (c).
+
+      (2) OAC ESTÁ na legenda da ficha (FICHA CAMPO!D19/F19) em RD-101, RD-102A
+          e RD-103, e tem BLOCO DEDICADO nas 4 obras ("OAC (Bueiro Tubular) /
+          OAE (Bueiro Celular/Passagem de Fauna)", colunas Escavação/Corpo/Ala/
+          Compactação). Na RD-104, que não o tem na legenda, a atividade é
+          lançada sob DRE (7/7 lançamentos). → hipótese (a) para a RD-104.
+
+      (3) Obras Complementares NÃO existe na ficha, em nenhuma forma. É nome
+          editorial do relatório para cerca/remoção de cerca/poste; na coluna
+          Serviço é CER (RD-101/178A/180) ou TER (RD-104). → hipótese (d) para
+          o nome, (a) para o lançamento.
+
+      REGRA PARA A AUTOMAÇÃO: derivar 5.2.x das abas do Relatório Fotográfico,
+      nunca do código de serviço da ficha (que é impreciso — ver
+      `desvios_de_codificacao`). O título da subseção precisa de um mapa
+      aba → título editorial por obra.
+    confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+  T-17b: "Não há regra descoberta que decida qual grafia o redator usa no título
+          da subseção ('OAC' vs 'Obras de Arte Corrente'; 'Obras Complementares'
+          vs 'Serviços Complementares'). Pode ser preferência do redator.
+          Pergunta para a Emmily."
+  T-18: "'Conservação do Trecho' tem 69 ocorrências em pasta de foto nas 4 obras e
+         nunca virou subseção 5.2.x na amostra. Verificar no corpus histórico."
+  T-19: "Confirmar se Detonação/Perfuração de rocha são registrados como TER."

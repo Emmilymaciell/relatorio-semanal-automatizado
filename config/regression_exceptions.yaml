@@ -1,0 +1,47 @@
+meta:
+  versao: 1
+  criado_em: 2026-09-21
+  resumo: >-
+    Movimentos que o regression guard leria como piora, mas que são melhora
+    deliberada. Cada um exige justificativa escrita e fica visível no relatório
+    do guard como JUSTIFICADO -- nunca some, nunca vira OK silencioso.
+
+# ---------------------------------------------------------------------------
+# COMO ISTO NÃO VIRA UM TAPETE
+# ---------------------------------------------------------------------------
+# O guard é mecânico: "READY só sobe, LIMITATION só desce". A regra é boa e
+# pega regressão de verdade. Mas ela não distingue "o documento piorou" de
+# "o documento parou de afirmar o que não podia afirmar".
+#
+# Regras desta lista:
+#   1. Entrada nomeia o par de versões exato -- não vale "de agora em diante".
+#   2. Entrada tem `motivo` e `evidencia`. Sem isso, o guard ignora a exceção.
+#   3. O guard imprime JUSTIFICADO, não OK, e o veredito vira
+#      LIBERA_COM_JUSTIFICATIVA -- quem lê vê que houve um movimento contrário
+#      à direção esperada e por quê.
+#   4. Uma exceção cobre UM item. Não existe curinga.
+
+excecoes:
+
+  - base: v0.2
+    nova: v0.3
+    item: "blocos LIMITATION"
+    de: 3
+    para: 5
+    motivo: >-
+      Os 2 blocos novos são a implementação do HISTORICAL_SHADOW: no lugar de
+      "possui 3 licenças emitidas e 3 pendentes" e "há 33 condicionantes
+      próximas do vencimento" -- afirmações sobre a semana 49 feitas com o
+      acervo de hoje -- o documento passou a declarar explicitamente que
+      aquele estado não foi reconstruído.
+    evidencia: >-
+      As mesmas 45 condicionantes da RD-103 dão 31 "Próximo do vencimento" se
+      recalculadas em 11/09/2026 (data de emissão do relatório oficial) e 2 em
+      21/09/2026; o oficial publica 1. O número não é reconstruível em
+      nenhuma data, e a v0.2 o emitia sem marca alguma.
+      Ver config/generation_modes.yaml e tests/test_generation_mode.py.
+    por_que_nao_e_piora: >-
+      Nenhum bloco READY virou LIMITATION por falha: o total de READY não caiu
+      (102 nas duas versões). O que mudou foi trocar afirmação sem lastro por
+      limitação declarada -- é exatamente o que a taxonomia chama de
+      SOURCE_LIMITATION, e é o desfecho pedido para a v0.3.

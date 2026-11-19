@@ -1,0 +1,101 @@
+# =============================================================================
+# annex_types.yaml — classificação SEMÂNTICA dos anexos por modo de integração
+#
+# Resolve P0.3 (FASE3_2B_RENDERER_V2_SPEC.md). Fonte única de verdade para
+# COMO um anexo entra no documento final. Proibido decidir isso por posição
+# ("if anexo.numero <= 3") em qualquer código — o modo vem SEMPRE deste
+# arquivo, indexado pelo `id` do anexo (o mesmo `id` de
+# report_schema.yaml#estrutura.s11_anexos.anexos e do que
+# `extratores/anexos.py` devolve).
+#
+# integration_mode:
+#   EMBEDDED_IMAGE  vira imagem de página cheia DENTRO do corpo do .docx;
+#                   herda cabeçalho e numeração de página do relatório.
+#   MERGED_PDF      PDF externo, mesclado DEPOIS da exportação DOCX -> PDF;
+#                   NÃO tem cabeçalho nem número de página do relatório.
+#
+# Evidência (golden, VISUAL_DIFF_MASTER.md §C1/§C2, GOLDEN_VISUAL_SPEC.md §8):
+#   p17–26 (PA-254, Acomp. Ambiental, Acomp. SST) têm logo e numeração
+#   contínua -> EMBEDDED_IMAGE. p27–35 (Unifilar, Diário) não têm nem logo
+#   nem número -> MERGED_PDF. O document.xml do golden só tem 9 seções, todas
+#   A4/A3 retrato: NÃO existe seção A0 nem A2 no Word (ver P0.1,
+#   DISCOVERY_CORRECTION em config/report_schema.yaml e
+#   config/report_versions.yaml).
+#
+# `papel_pdf` aqui é o papel do PDF FINAL mesclado (verdadeiro), não de uma
+# seção do Word (que não existe para os MERGED_PDF). Para os dois anexos cujo
+# papel varia por obra, o valor abaixo é o predominante; a fonte de verdade
+# por obra é `road_registry.yaml` (`formato_unifilar`) — nunca um `if obra ==`
+# no código.
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-17
+  resolve: [P0.3]
+  fase: "3.2B — P0 arquitetura"
+
+anexos:
+  # ---- EMBEDDED_IMAGE — imagem de página cheia dentro do corpo do .docx -----
+  parecer_tecnico:
+    integration_mode: EMBEDDED_IMAGE
+    ordem: 1
+    titulo: "Parecer Técnico"
+    papel: "A4 retrato"
+    n_paginas_observado: 6
+    evidencia: "golden p17–22, herda cabeçalho e numeração (VISUAL_DIFF_MASTER.md §C2)"
+
+  acompanhamento_ambiental:
+    integration_mode: EMBEDDED_IMAGE
+    ordem: 2
+    titulo: "Acompanhamento Ambiental"
+    papel: "A4 retrato"
+    n_paginas_observado: 2
+    evidencia: "golden p23–24"
+
+  acompanhamento_sst:
+    integration_mode: EMBEDDED_IMAGE
+    ordem: 3
+    titulo: "Acompanhamento de Saúde e Segurança do Trabalho"
+    papel: "A4 retrato"
+    n_paginas_observado: 2
+    evidencia: "golden p25–26"
+
+  nao_conformidade:
+    integration_mode: EMBEDDED_IMAGE
+    ordem: 4
+    titulo: "Não Conformidade"
+    papel: "A4 retrato"
+    n_paginas_observado: null
+    nota: "sem evidencia direta de paginacao no golden desta amostra; classificado por analogia aos demais anexos condicionais (mesma familia documental de PA-254/ambiental/SST)"
+    confianca: PROVAVEL
+
+  ata_reuniao:
+    integration_mode: EMBEDDED_IMAGE
+    ordem: 5
+    titulo: "Ata de Reunião"
+    papel: "A4 retrato"
+    n_paginas_observado: null
+    nota: "sem evidencia direta de paginacao no golden desta amostra; classificado por analogia aos demais anexos condicionais"
+    confianca: PROVAVEL
+
+  # ---- MERGED_PDF — PDF externo, mesclado DEPOIS da exportação DOCX->PDF ----
+  diagrama_unifilar:
+    integration_mode: MERGED_PDF
+    posicao: penultimo
+    titulo: "Diagrama Unifilar"
+    papel_pdf_default: "A0 paisagem"
+    papel_pdf_fonte: "road_registry.yaml#obras.<obra>.formato_unifilar (RD102A = A3 paisagem, exceção)"
+    n_paginas_observado: 1
+    cabecalho_e_numeracao: false
+    evidencia: "golden p27, sem logo e sem numero de pagina (VISUAL_DIFF_MASTER.md §C1)"
+
+  diario_de_obras:
+    integration_mode: MERGED_PDF
+    posicao: ultimo
+    titulo: "Diário de Obras"
+    papel_pdf_default: "A2 paisagem"
+    n_paginas_observado: 7
+    regra_paginas: "uma pagina A2 por dia do periodo (7/7 confirmado, GOLDEN_VISUAL_SPEC.md §8)"
+    cabecalho_e_numeracao: false
+    evidencia: "golden p28-34 (+ p35 termo do diario), sem logo e sem numero de pagina"

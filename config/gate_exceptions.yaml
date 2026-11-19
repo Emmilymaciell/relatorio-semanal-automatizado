@@ -1,0 +1,26 @@
+# Excecoes de critical gate — divergencia golden x shadow com causa CONFIRMADA fora do motor.
+#
+# Lido por scripts/montar_pdf_final.py::_aplicar_excecoes. Um gate reprovado na
+# comparacao bruta so vira CRITICAL_GATE_PASS_COM_EXCECAO se houver entrada aqui para a
+# mesma obra + inicio do periodo + id do gate. A evidencia e' obrigatoria e vai para o
+# critical_gates_<v>.json.
+#
+# Classes aceitas: GOLDEN_DEFECT, SOURCE_LIMITATION (docs/RELEASE_CRITERIA.md §3).
+# Nivel minimo: CONFIRMADO (CLAUDE.md, niveis de confianca). PROVAVEL/HIPOTESE nao entram.
+# Nunca usar para esconder GLOBAL_ENGINE_BUG.
+
+excecoes:
+  - id: GX-001
+    obra: RD104
+    inicio: "2026-08-29"
+    gates: [G08, G10, G11]
+    classe: GOLDEN_DEFECT
+    nivel: CONFIRMADO
+    evidencia: >-
+      NC-028-1 (concreto da ala do bueiro, estaca 2468, 14 MPa < 20 MPa) foi emitida em
+      01/09/2026, dentro do periodo. Fonte: tracker de NC, data_abertura 2026-09-01; PDF
+      'RD104/3_Gestao Tecnica de Obra/3. Notificações/Not. Geradas/Programa/2026 - 09/NC-028-1 -
+      Não Conformidade - RD104.pdf' criado em 2026-09-01; o Relatorio Mensal RM-012.1 a anexa.
+      O golden RO_043.1 (emitido em 2026-09-11, depois da NC) declara na 8.1 "não houve emissão
+      de não conformidades emitidas pelo Programa" e nao anexa a NC. O shadow segue a fonte
+      (regra: nao reproduzir erros herdados). G10/G11 divergem pelo mesmo motivo (anexo de NC).

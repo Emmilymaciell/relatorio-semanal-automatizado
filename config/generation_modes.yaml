@@ -1,0 +1,119 @@
+meta:
+  versao: 1
+  criado_em: 2026-09-21
+  fase: "3.4 (v0.3)"
+  resumo: >-
+    Distingue gerar um relatório da semana corrente de reconstruir uma semana
+    histórica. A diferença não é cosmética: para a semana corrente as fontes
+    são contemporâneas do fato relatado; para uma semana passada, várias
+    fontes já mudaram, e o estado que elas tinham na data de emissão não é
+    recuperável.
+
+# ---------------------------------------------------------------------------
+# POR QUE ISTO EXISTE
+# ---------------------------------------------------------------------------
+# O Final Candidate v0.2 da RD-103 (semana 49, emitida em 11/09/2026) afirmou
+# no corpo do relatório:
+#
+#     "o empreendimento possui 3 licenças emitidas e 3 licenças pendentes"
+#     "há 33 condicionantes próximas do vencimento"
+#
+# contra "4 e 5" e "1" do relatório oficial. Investigando a planilha-fonte:
+#
+#   hoje usado no recálculo | Finalizada | Próx. vencimento | No prazo | Pendente
+#   2026-09-11 (emissão)    |     11     |        31        |    3     |    0
+#   2026-09-21 (hoje)       |     11     |         2        |    1     |   31
+#
+# Ou seja: nem usando a data de emissão do próprio relatório oficial o número
+# bate, e ele oscila de 31 para 2 em dez dias, porque "próximo do vencimento"
+# é uma função da data de hoje aplicada sobre um acervo que também mudou.
+#
+# O erro não era o número. Era emitir um número volátil como se fosse fato
+# histórico apurado. Copiar o número do golden seria pior ainda -- o golden é
+# referência de comparação, jamais fonte.
+
+modos:
+  CURRENT:
+    descricao: >-
+      Relatório da semana corrente. As fontes refletem o estado contemporâneo
+      do fato relatado. Redação normal, com os números.
+    afirma_estado_atual_como_fato: true
+
+  HISTORICAL_SHADOW:
+    descricao: >-
+      Reconstrução de uma semana passada a partir das fontes de hoje (shadow
+      report). Dado cuja fonte só guarda o estado ATUAL não pode ser
+      apresentado como o estado daquela semana.
+    afirma_estado_atual_como_fato: false
+
+inferencia:
+  # Um relatório é emitido poucos dias depois do fim da semana (o oficial da
+  # semana 49 saiu 7 dias depois). Acima desta folga, a geração é
+  # necessariamente uma reconstrução.
+  dias_apos_fim_para_historico: 21
+  nota: >-
+    É só o padrão. O modo pode ser fixado explicitamente na linha de comando
+    (--modo), e o valor efetivamente usado fica gravado no report_data e no
+    candidate_manifest -- nunca inferido de novo na leitura.
+
+# ---------------------------------------------------------------------------
+# DADOS QUE NÃO SE RECONSTROEM
+# ---------------------------------------------------------------------------
+# Um dado entra aqui quando a fonte guarda SÓ o estado atual: sem coluna de
+# data do evento, sem versionamento, sem snapshot por semana. Não é opinião --
+# cada entrada cita a evidência.
+#
+# `acao_em_historical_shadow`:
+#   omitir_afirmacao  -- a frase específica não é emitida; o resto do
+#                        parágrafo, que é genérico, permanece
+#   marcar_limitacao  -- o valor é emitido, mas com [LIMITAÇÃO DA FONTE]
+#   marcar_hitl       -- emitido com [HITL], exige decisão humana
+
+dados_nao_reconstruiveis_historicamente:
+
+  - id: environment.licencas_kpis
+    onde: "seção 6, frase 'possui N licenças emitidas e M pendentes'"
+    fonte: "04_Acompanhamento - Licenca Ambiental.xlsx, aba Licenças"
+    motivo: >-
+      A aba não registra a data em que cada licença mudou de status. Ler hoje
+      devolve o acervo de hoje, não o de 11/09/2026.
+    evidencia: >-
+      27 licenças na planilha hoje, 6 associadas à RD-103 (3 emitidas + 3
+      pendentes); o relatório oficial de 11/09 fala em 4 emitidas e 5
+      pendentes, e não há como decidir quais linhas existiam naquela data.
+    acao_em_historical_shadow: omitir_afirmacao
+
+  - id: environment.condicionantes_status
+    onde: "seção 6, frase 'há N condicionantes próximas do vencimento'"
+    fonte: "04_Acompanhamento - Licenca Ambiental.xlsx, aba Condicionantes"
+    motivo: >-
+      O status é uma FUNÇÃO da data de hoje (Condicionantes!G: <=0 Pendente,
+      <=30 Próximo do vencimento, senão No prazo). Recalcular com a data de
+      emissão do relatório antigo também não resolve, porque o acervo de
+      condicionantes mudou junto.
+    evidencia: >-
+      RD-103, mesmas 45 condicionantes: em 2026-09-11 dá 31 'Próximo do
+      vencimento'; em 2026-09-21 dá 2, com 31 já 'Pendente'. O oficial diz 1.
+    acao_em_historical_shadow: omitir_afirmacao
+
+  - id: nonconformities.history_by_status
+    onde: "seção 8.3, tabela de status das não conformidades"
+    fonte: "planilha de acompanhamento de NC, Tbl_VISAO"
+    motivo: "Tbl_VISAO usa TODAY() -- a tabela mostra o estado atual, por construção."
+    evidencia: >-
+      'Encerrada' era 22 no relatório oficial e 24 ao gerarmos; a planilha
+      mudou no meio de uma sessão de trabalho (22 -> 25 às 11:33). Nenhum dos
+      117 arquivos do acervo registra data de encerramento.
+    acao_em_historical_shadow: marcar_limitacao
+    nota: >-
+      Já era o comportamento desde a v0.1 -- a tabela é útil e o leitor é
+      avisado. Fica declarado aqui para a regra ser uma só.
+
+# ---------------------------------------------------------------------------
+# CLASSIFICAÇÃO NA COMPARAÇÃO
+# ---------------------------------------------------------------------------
+# Divergência causada por qualquer item acima é SOURCE_LIMITATION, nunca
+# SHADOW_ERROR: o extrator está certo, a fonte é que não guarda o passado.
+# SHADOW_ERROR fica reservado para erro nosso de fato -- filtro errado,
+# cálculo errado, texto faltando, layout quebrado.
+classificacao_de_divergencia: SOURCE_LIMITATION

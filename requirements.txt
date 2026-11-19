@@ -1,0 +1,15 @@
+# Dependencias que os scripts importam (versoes instaladas e testadas, Python 3.12, Windows 11).
+# Instalar:  python -m pip install -r requirements.txt
+python-docx==1.2.0
+PyMuPDF==1.26.7        # import fitz
+openpyxl==3.1.5
+PyYAML==6.0.3
+pillow==12.1.0
+reportlab==4.4.10
+lxml==6.0.2            # usado em scripts/04_extrair_docx.py (fase de descoberta)
+pywin32==311           # Word COM (docx_to_pdf.py); exige Microsoft Word instalado
+
+# Opcional: sem 'qrcode' o QR da secao ambiental sai como placeholder marcado
+# qrcode
+# Apenas para rodar os testes via pytest (os testes tambem rodam como `python tests/test_x.py`)
+# pytest==9.1.1

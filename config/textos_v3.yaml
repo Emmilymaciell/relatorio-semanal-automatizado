@@ -1,0 +1,709 @@
+# =============================================================================
+# textos_v3.yaml — catálogo de textos fixos e templates da estrutura CURRENT (v3)
+#
+# Resolve a "regra de origem" da spec Fase 3 Slice 3, Sec.5:
+#   1. Todo texto fixo/template aqui é DERIVADO do corpus da descoberta
+#      (docs/mapeamento/TEXTOS_E_TEMPLATES.md e docs/mapeamento/GUIA_DE_REDACAO.md),
+#      EXCLUINDO o relatório golden desta comparação (RO_049.1 - RD-103).
+#   2. Cada entrada registra `confirmado_em_relatorios`: a contagem publicada em
+#      TEXTOS_E_TEMPLATES.md, com 1 subtraído por precaução onde o golden pode
+#      integrar o corpus de 189 relatórios (RO_049.1 foi emitido em 2026-09-11,
+#      dentro da janela coberta pelo corpus de 2026-09-17) — nunca inflado.
+#      Onde a forma é a PADRONIZAÇÃO alvo do GUIA_DE_REDACAO (ainda não
+#      majoritária no acervo), `confirmado_em_relatorios: 0` e a nota registra
+#      isso explicitamente — não é um texto "visto muitas vezes", é uma correção.
+#   3. NENHUM valor específico do período (data, número, percentual, estaca,
+#      NC, serviço, contagem, nº de páginas) mora aqui — isso vem sempre de
+#      report_data.json. Este arquivo só guarda a FORMA da frase.
+#   4. `assert_nao_e_golden()` (scripts/gerador/__init__.py) segue valendo em
+#      tempo de execução: nada aqui foi lido do RO_049.1 - RD-103.docx/.pdf.
+#
+# Placeholders entre chaves ({data_inicio}, {servico}, ...) são substituídos
+# pelo content_builder.py — nunca aqui.
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-17
+  fonte_primaria: [docs/mapeamento/TEXTOS_E_TEMPLATES.md, docs/mapeamento/GUIA_DE_REDACAO.md,
+                    docs/mapeamento/PADRAO_ATUAL_RELATORIO_SEMANAL.md]
+  golden_excluido: "RO_049.1 - RD-103 (RD103, 2026-08-29..2026-09-04)"
+  regra_de_contagem: >
+    confirmado_em_relatorios = contagem publicada em TEXTOS_E_TEMPLATES.md § 2,
+    menos 1 quando o golden desta comparação plausivelmente integra o universo
+    de 189 relatórios do corpus (emitido 2026-09-11, dentro da janela do
+    corpus). Textos que são a FORMA-ALVO da padronização do GUIA_DE_REDACAO
+    (ainda não majoritária no acervo bruto) ficam com confirmado_em_relatorios: 0
+    e nota explícita — não inventam frequência que não existe.
+
+textos:
+
+  capa_titulo:
+    classe: A
+    texto: "RELATÓRIO SEMANAL DE ACOMPANHAMENTO DE OBRAS"
+    confirmado_em_relatorios: null
+    nota: "título fixo da capa; classe A, sem variação observada na amostra (report_schema.yaml capa.titulo)"
+
+  s1_contratual:
+    classe: A
+    template: >-
+      O presente relatório de avanço semanal das obras da rodovia {rodovia},
+      trecho: {trecho_extenso}, extensão: {extensao} é parte integrante das
+      obrigações do contrato {contrato_prog}, do CONSÓRCIO DE APOIO À
+      ESTRUTURAÇÃO DE PROJETOS – Programa, cujo objeto é a prestação de serviços
+      relacionados à gestão e certificação de projetos e obras de infraestrutura
+      e demais serviços, nos termos do Chamamento Público para Pré-Qualificação
+      nº 01/2024-Órgão Supervisor e em conformidade com o escopo estabelecido no Termo de
+      Referência para o Programa de Gestão de Obras no âmbito do Fundo Estadual
+      de Infraestrutura ‐ Fundo Estadual de Infraestrutura, promovido pelo INSTITUTO PARA
+      PARCEIRO – Parceiro.
+    confirmado_em_relatorios: 158
+    fonte: >-
+      levantado do corpus por scripts/17_levantar_texto_s1.py sobre
+      output/extracao/texto/, com o golden RD103_RO049.1 EXCLUÍDO.
+      158 de 187 relatórios com a seção 1 legível trazem este parágrafo.
+    variantes_observadas: >-
+      duas redações no acervo: 76 ocorrências com "extensão: {X} é parte
+      integrante das obrigações do contrato" e 82 com "extensão: {X} e é parte
+      integrante das obrigações, do contrato". A segunda tem um "e" solto e uma
+      vírgula indevida entre "obrigações" e "do contrato". Adotada a primeira,
+      gramaticalmente correta — padronizar FORMA, nunca FATO (GUIA_DE_REDACAO).
+      A ocorrência de "Pré- Qualificação" nas contagens é quebra de linha do PDF,
+      não variante real.
+    nota: >-
+      classe A (texto fixo do processo). Na primeira geração desta seção o texto
+      ficou como LIMITATION porque TEXTOS_E_TEMPLATES.md não citava o literal;
+      ele existe no corpus extraído e foi levantado de lá, não do golden.
+
+  s1_periodo_servicos:
+    classe: [C, TPL]
+    template: >-
+      As informações apresentadas neste relatório referem-se ao período de
+      {data_inicio} a {data_fim}. No intervalo considerado, foram registradas
+      atividades de {lista_de_servicos}.
+    confirmado_em_relatorios: 135
+    fonte: "TEXTOS_E_TEMPLATES.md §2.2 — 136 relatórios (72,3%), golden subtraído"
+
+  s1_reuniao_negativa:
+    classe: TPL
+    template: >-
+      Durante o período, não foram realizadas reuniões de alinhamento entre o Programa
+      e a empresa executora {executora} no canteiro de obras da Rodovia {rodovia}.
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.1 — forma condicional negativa; não quantificada isoladamente no corpus"
+
+  s1_reuniao_positiva:
+    classe: TPL
+    template: >-
+      Durante o período, foi realizada reunião de alinhamento entre o Programa e a empresa
+      executora {executora} no canteiro de obras da Rodovia {rodovia}, em {data}, cuja
+      ata integra os anexos deste relatório.
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.1"
+
+  s2_legenda_figura1:
+    classe: A
+    template: "Figura {n} – Ficha de andamento físico da obra"
+    confirmado_em_relatorios: null
+    fonte: >-
+      docs/mapeamento/04_layout_visual.md §5.2/§9.1 — RD101 nº47 (RO_047.1 -
+      RD-101, fora do golden desta comparação, RO_049.1 - RD-103); única
+      legenda do documento com campo SEQ do Word, ou seja, a forma "oficial"
+      de referência. Fase 3.3 Sec.3.1: fecha a lacuna do Checkpoint 3.2B
+      (sequência de Figura não pode começar em 2).
+
+  s3_legenda_grafico1:
+    classe: A
+    template: "Gráfico {n} – Avanço global da obra."
+    confirmado_em_relatorios: null
+    fonte: "docs/mapeamento/04_layout_visual.md §9.1 — RD101 nº47 (RO_047.1 - RD-101)"
+
+  s5_1_legenda_tabela1:
+    classe: A
+    template: "Tabela {n} - Condições climáticas no período"
+    confirmado_em_relatorios: null
+    fonte: >-
+      docs/mapeamento/04_layout_visual.md §9.1 (forma predominante em
+      RD-103/RD-104); docs/mapeamento/06_fontes_dados.md (RO_047.1 - RD-101).
+      GOLDEN_INTERNAL_VARIATION conhecida: RD-102A usa "Tabela 1 - Condições
+      climáticas." (sem "no período") -- forma minoritária, não adotada.
+
+  s3_avanco_texto:
+    classe: TPL
+    template: "Avanço físico global do período: {concluido} concluído; {concluido_atacado} concluído e atacado."
+    confirmado_em_relatorios: null
+    nota: >
+      Rótulo factual minimalista para os dois números de avanço (spec Sec.5:
+      "avanço (número, não figura)") — não é prosa narrativa reconstruída,
+      só os valores computados com um rótulo; por isso não exige citação de
+      corpus como as frases classe A.
+
+  s4_unifilar_texto_base:
+    classe: A
+    template: >-
+      O Diagrama Unifilar apresentado em anexo representa, de forma simplificada, o avanço
+      físico acumulado da execução da Rodovia {rodovia}, indicando a progressão das
+      frentes de serviço ao longo do trecho contratual. Esse instrumento permite visualizar,
+      em um traçado linear, os segmentos concluídos, em execução e previstos, servindo como
+      referência para o acompanhamento mensal e para a verificação da conformidade entre o
+      avanço planejado e o efetivamente executado.
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.2 — idêntico nas 4 obras (\"manter\"); TEXTOS_E_TEMPLATES.md §2.2"
+
+  s4_unifilar_frase_servicos:
+    classe: [C, TPL]
+    template: "No intervalo considerado, foram registradas atividades de {lista_de_servicos}."
+    confirmado_em_relatorios: 135
+    fonte: "mesmo template de s1_periodo_servicos; GUIA_DE_REDACAO.md §4.2 padroniza a forma da RD-103 para esta"
+
+  s5_1_abertura_tabela:
+    classe: A
+    texto: "Segue abaixo as condições climáticas referente ao período do presente relatório:"
+    confirmado_em_relatorios: 128
+    fonte: "TEXTOS_E_TEMPLATES.md §2.1 — 129 relatórios (100%), golden subtraído"
+
+  s5_1_frase_sem_execucao_um_dia:
+    classe: [C, TPL]
+    template: "No dia {data} não houve execução de atividades."
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.3; docs/mapeamento/T13_CLIMA_DIA_SEM_FICHA.md"
+
+  s5_1_frase_sem_execucao_varios_dias:
+    classe: [C, TPL]
+    template: "Nos dias {datas} não houve execução de atividades."
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.3"
+
+  s5_2_intro:
+    classe: A
+    texto: >-
+      O relatório fotográfico demonstra de forma visual as informações relevantes das
+      atividades desenvolvidas ao longo do trecho.
+    confirmado_em_relatorios: 122
+    fonte: "TEXTOS_E_TEMPLATES.md §2.1 — 123 relatórios (75,0%), golden subtraído"
+
+  s5_2_legenda_foto:
+    classe: TPL
+    template: "Figura {n} – Relatório fotográfico – {servico_canonico} – {rodovia}."
+    confirmado_em_relatorios: 0
+    fonte: "GUIA_DE_REDACAO.md §4.4 (R-11) — forma-alvo da padronização; hoje há 3 padrões distintos no acervo, nenhum majoritário nesta forma unificada"
+
+  s6_texto_com_numero:
+    classe: [E, TPL]
+    template: >-
+      A gestão e o rastreamento das licenças e outorgas [de uso de recursos hídricos —
+      trecho truncado no corpus], bem como o status das condicionantes ambientais da
+      Licença Ambiental Única {numero_doc} [continuação não citada literalmente no
+      corpus da descoberta].
+    confirmado_em_relatorios: 120
+    fonte: "TEXTOS_E_TEMPLATES.md §2.2 — 121 relatórios (72,0%), golden subtraído"
+    nota: >
+      TEXTOS_E_TEMPLATES.md §2.2 cita o texto com reticências em DOIS pontos
+      ("...licenças e outorgas…, bem como... Licença Ambiental Única
+      {numero_doc}…"); os dois trechos ocultos pela reticência NÃO são
+      reproduzidos aqui por invenção — ficam marcados entre colchetes. Ver
+      s6_texto_sem_numero para o caso (mais comum nesta fatia) em que
+      numero_doc também não está disponível.
+
+  s6_texto_sem_numero:
+    classe: [E, TPL, HITL]
+    template: >-
+      O acompanhamento ambiental da execução das obras da Rodovia {rodovia} segue o ciclo
+      quinzenal de vistoria técnica; o número da Licença Ambiental Única aplicável não foi
+      comprovado por esta fatia da automação e requer confirmação humana antes da publicação.
+    confirmado_em_relatorios: null
+    nota: "usado quando numero_doc da licença não está disponível em report_data.json (fora do orçamento desta fatia — ver environment.kpis_status)"
+
+  s7_texto_base:
+    classe: A
+    texto: >-
+      Além disso, ao final de cada semana, é elaborado um termo de encerramento que reúne
+      as informações registradas no período.
+    confirmado_em_relatorios: 58
+    fonte: "TEXTOS_E_TEMPLATES.md §2.1 — 59 relatórios (48,0%), golden subtraído"
+    nota: >
+      Truncado no ponto exato em que TEXTOS_E_TEMPLATES.md §2.1 cita o texto
+      (com reticências "…" após "no período"); a continuação real do
+      parágrafo não está transcrita ali, então não é reproduzida aqui —
+      completá-la seria inventar prosa não confirmada pelo corpus.
+
+  s8_1_negativa:
+    classe: A
+    texto: >-
+      Durante o período de execução de serviços abordado pelo presente relatório, não
+      houve emissão de não conformidades pelo PROG.
+    confirmado_em_relatorios: 53
+    fonte: >-
+      TEXTOS_E_TEMPLATES.md §2.1 — 54 relatórios (42,9%) na forma bruta "emitidas ...
+      emitidas pelo Programa"; redundância eliminada e concordância "pelo Programa" corrigida
+      conforme GUIA_DE_REDACAO.md R-01/R-10 (correção gramatical, não estilo — Programa é
+      masculino, "o Programa")
+
+  s8_1_positiva_intro:
+    classe: TPL
+    template: >-
+      Durante o período de execução de serviços abordado pelo presente relatório, foram
+      emitidas {n} não conformidades pelo Programa, anexadas a este relatório:
+    # R1 (bug 8): concordância para n == 1 (genérico, escolhido por quantidade)
+    template_singular: >-
+      Durante o período de execução de serviços abordado pelo presente relatório, foi
+      emitida {n} não conformidade pelo Programa, anexada a este relatório:
+    confirmado_em_relatorios: null
+    fonte: "GUIA_DE_REDACAO.md §4.5"
+
+  s8_1_item:
+    classe: [D, TPL]
+    template: "{sentence}"
+    confirmado_em_relatorios: null
+    fonte: "gerado por scripts/gerador/extratores/nc.gerar_sentenca_81 (VAL, confirmado 3/3 em NC_TEXTO_LINEAGE.md)"
+
+  s8_2_negativa:
+    classe: A
+    texto: >-
+      Durante o período de execução de serviços abordado pelo presente relatório, não
+      houve emissão de não conformidades pela Órgão Contratante.
+    confirmado_em_relatorios: 132
+    fonte: "TEXTOS_E_TEMPLATES.md §2.1 — 133 relatórios (100%), golden subtraído"
+
+  s9_negativa:
+    classe: TPL
+    texto: >-
+      Durante o período abrangido por este relatório, não foram registrados riscos ou
+      interferências em campo.
+    confirmado_em_relatorios: 0
+    nota: >
+      Forma unificada alvo (GUIA_DE_REDACAO.md §4.7, R-02/R-05): hoje há 4 redações
+      distintas, uma por obra (163 ocorrências ao todo, nenhuma nesta forma exata) —
+      não é a forma majoritária no acervo bruto, é a correção adotada. Ver Q-10
+      (FASE3_SLICE_3_SPEC.md §1): geração NÃO bloqueia a montagem, mas entra HITL.
+
+  s10_termo:
+    classe: C
+    template: >-
+      O Relatório Semanal de Acompanhamento de Obras da {obra_sem_hifen} – N° {numero},
+      referente à consolidação e à apresentação das atividades desenvolvidas durante o
+      período de {data_inicio} a {data_fim}, no âmbito do Contrato Nº{contrato_obra} –
+      Parceiro X {executora_contratual}, apresenta-se constituído de {n_paginas}
+      ({n_paginas_extenso}) páginas.
+
+
+      {cidade}, {data_emissao_extenso}.
+    confirmado_em_relatorios: 110
+    fonte: "TEXTOS_E_TEMPLATES.md §2.2 — 111 relatórios (72,5%), golden subtraído; GUIA_DE_REDACAO.md §4.8 (forma fixa, já uniforme nas 4 obras)"
+
+  # ===========================================================================
+  # Fase 3.4 (v0.2), GF-1 -- texto-padrão levantado do corpus para as 5 seções
+  # que faltavam (TEXTO-01..05 de comparison_v0.1.json). MESMO método de
+  # scripts/17_levantar_texto_s1.py: normaliza quebra de linha do PDF, agrupa
+  # por esqueleto, escolhe a redação predominante, com o golden RD103_RO049.1
+  # SEMPRE excluído. Script de levantamento: scripts/20_levantar_texto_gf1.py
+  # (output/analises/texto_gf1.json tem a contagem bruta por variante).
+  # ===========================================================================
+
+  # --- Seção 3, TEXTO-01 -- 3 parágrafos, 100% idênticos em 108/108
+  # relatórios legíveis (golden excluído), nas 4 obras, estáveis também no
+  # subconjunto CURRENT/v3 (18/18). Sem nenhuma variável -- classe A.
+  s3_avanco_conceito:
+    classe: A
+    texto: >-
+      O avanço global da obra é um indicador fundamental para o acompanhamento e
+      controle do progresso físico do empreendimento, permitindo a avaliação
+      consolidada das atividades executadas em relação ao planejamento
+      estabelecido. Esse indicador considera o conjunto de serviços realizados,
+      ponderados conforme sua relevância no escopo total, refletindo de forma
+      objetiva o estágio atual da obra.
+    confirmado_em_relatorios: 103
+    fonte: "scripts/20_levantar_texto_gf1.py sobre output/extracao/texto/ (golden RD103_RO049.1 excluído) -- 103/103 (100%) idêntico"
+
+  s3_avanco_concluido_conceito:
+    classe: A
+    texto: >-
+      No que se refere ao avanço global dos serviços concluídos, trata-se da
+      mensuração específica das etapas já finalizadas. Esse índice evidencia o
+      percentual de cumprimento das obrigações contratuais, considerando apenas
+      os serviços efetivamente concluídos e aceitos, sendo essencial para fins
+      de medição, faturamento e verificação de desempenho.
+    confirmado_em_relatorios: 103
+    fonte: "idem s3_avanco_conceito -- mesmo grupo FIXO, 103/103 (100%)"
+
+  s3_avanco_concluido_atacado_conceito:
+    classe: A
+    texto: >-
+      Por sua vez, o avanço global dos serviços concluídos e atacados amplia
+      essa análise ao incorporar, além dos serviços concluídos, aqueles que
+      ainda estão sendo executados. A inclusão desse componente permite uma
+      visão mais abrangente do progresso, contemplando não apenas o que foi
+      finalizado, mas também o que já foi significativamente adiantado.
+    confirmado_em_relatorios: 103
+    fonte: "idem s3_avanco_conceito -- mesmo grupo FIXO, 103/103 (100%)"
+    nota: >-
+      comparison_v0.1.json (TEXTO-01) descreve o golden como "3 parágrafos
+      completos" antes do gráfico. O corpus também mostra uma 4ª frase muito
+      frequente logo depois deste parágrafo ("Dessa forma, a análise conjunta
+      desses indicadores representados no gráfico a seguir, proporciona uma
+      compreensão mais completa do andamento da obra." -- 58/103, 56%, mais a
+      variante antiga com "tabela" em vez de "gráfico"), mas ela NÃO entra
+      nesta rodada: o plano fecha o escopo em 3 parágrafos e adicionar uma 4ª
+      frase não evidenciada como exigida arriscaria abrir um diff NOVO contra
+      o golden em vez de fechar o existente. Reportado como contradição
+      plano/realidade, não implementado -- ver relato desta rodada.
+      RESOLVIDO NA v0.3: ver s3_frase_ponte_grafico abaixo.
+
+  # --- Seção 3, frase-ponte para o Gráfico 1 (TEXTO-01, resolvido na v0.3) ---
+  # A v0.2 deixou este item aberto de propósito (ver nota acima). O
+  # levantamento dedicado (scripts/24_levantar_frase_ponte_s3.py) mostrou por
+  # que ele não podia virar texto fixo: a frase NÃO é universal, e a divisão
+  # é POR OBRA, não por semana.
+  #
+  #   RD-101    23 com / 3 sem   -> predominante COM
+  #   RD-103    22 com / 3 sem   -> predominante COM
+  #   RD-102A    6 com / 20 sem  -> predominante SEM
+  #   RD-104     6 com / 20 sem  -> predominante SEM
+  #
+  # Emitir a frase em todas as obras acertaria a RD-103 (que é onde o shadow
+  # roda hoje) e ERRARIA RD-102A e RD-104 no teste multiobra. Por isso o
+  # liga/desliga mora em road_registry.yaml#s3_frase_ponte_grafico, junto das
+  # outras 4 variações por obra do GF-1 -- nunca num `if obra ==` no código.
+  #
+  # Quando presente, a redação é única: 57/57 idênticas, sem nenhum número
+  # dentro (não depende de report_data).
+  s3_frase_ponte_grafico:
+    classe: A
+    condicional_por_obra: road_registry.s3_frase_ponte_grafico
+    texto: >-
+      Dessa forma, a análise conjunta desses indicadores representados no
+      gráfico a seguir, proporciona uma compreensão mais completa do andamento
+      da obra.
+    confirmado_em_relatorios: 57
+    fonte: "scripts/24_levantar_frase_ponte_s3.py sobre output/extracao/texto/ (golden RD103_RO049.1 excluído) -- 57 de 103 relatórios com a seção 3; quando presente, 57/57 (100%) com esta redação exata"
+
+  # --- Seção 5/5.1, TEXTO-02 -- parágrafo intro (2 frases, 176/187 = 94% dos
+  # relatórios com a seção legível) + as 3 definições climáticas em lista
+  # (162/176 = 92%, com ou sem marcador "•" conforme a extração do PDF).
+  s5_1_intro_definicoes:
+    classe: A
+    texto: >-
+      Este item visa apresentar as condições climáticas que a obra estava
+      submetida durante o período de execução do presente relatório, juntamente
+      com as frentes de serviço atacadas. As classificações das condições
+      climáticas são consideradas:
+    confirmado_em_relatorios: 127
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- 127/127 (100%) idêntico no texto
+      (golden excluído); 86/127 sem nenhum artefato de extração no meio, os
+      outros 41 têm o heading "5.1./4.1. Dados climáticos do período:"
+      duplicado pela extração do PDF entre as duas frases -- artefato de
+      quebra de página, não uma redação diferente (o texto antes e depois é
+      byte-idêntico).
+
+  s5_1_definicao_bom:
+    classe: A
+    texto: "Bom – Condição climática favorável a execução da(s) frente(s) de execução;"
+    confirmado_em_relatorios: 162
+    fonte: "scripts/20_levantar_texto_gf1.py -- 162/176 (92%), golden excluído"
+
+  s5_1_definicao_chuvoso:
+    classe: A
+    texto: "Chuvoso – Condição climática na qual compromete a execução de alguma(s) frente(s) de serviço;"
+    confirmado_em_relatorios: 162
+    fonte: "idem s5_1_definicao_bom"
+
+  s5_1_definicao_impraticavel:
+    classe: A
+    texto: >-
+      Impraticável – Condição climática na qual não é possível a execução de
+      nenhuma frente de serviço, comprometendo o avanço da obra.
+    confirmado_em_relatorios: 162
+    fonte: "idem s5_1_definicao_bom"
+
+  # --- Seção 6, TEXTO-05 -- 4 parágrafos descritivos. A e B não têm variável
+  # de contagem (fixos); C (licenças) e D (condicionantes) variam de REDAÇÃO
+  # por obra (fato levantado nesta rodada, 100% consistente dentro de cada
+  # obra) -- por isso o texto de cada letra vira um template próprio,
+  # selecionado por road_registry.<obra>.ambiental_modelo_licencas /
+  # ambiental_conector_condicionantes, nunca por `if obra ==` no código.
+  s6_intro_monitoramento_quinzenal:
+    classe: [A, TPL]
+    template: >-
+      O monitoramento do acompanhamento ambiental e das condições de Segurança e
+      Saúde no Trabalho (SST) é realizado com periodicidade quinzenal, por meio
+      de inspeções e verificações sistemáticas em campo. Durante o período
+      abrangido por este relatório, foram executadas as atividades de
+      acompanhamento previstas, cujos registros e documentos comprobatórios
+      encontram-se anexos, juntamente com o Parecer Técnico {pa_numero}, para
+      fins de análise e rastreabilidade das ações desenvolvidas.
+    confirmado_em_relatorios: 24
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- 24/27 (89%) das semanas quinzenais
+      com a seção 6 aplicável (golden excluído); só ocorre quando
+      environment.applies é verdadeiro. {pa_numero} vem de
+      annexes.parecer_tecnico (já extraído por scripts/gerador/extratores/parecer.py),
+      nunca digitado.
+
+  s6_dashboard_ambiental:
+    classe: A
+    texto: >-
+      O Dashboard Ambiental apresenta o panorama atualizado da regularidade
+      ambiental do empreendimento, com foco no controle de prazos e validade
+      dos atos autorizativos vigentes. O monitoramento sistemático das licenças
+      ambientais e outorgas de uso de recursos hídricos é uma atividade
+      estratégica para assegurar conformidade legal, mitigar riscos
+      operacionais e garantir a continuidade das atividades perante os órgãos
+      ambientais competentes, conforme é apresentado em anexo ao final deste
+      relatório.
+    confirmado_em_relatorios: 97
+    fonte: "scripts/20_levantar_texto_gf1.py -- 97/119 (81%), golden excluído"
+
+  # modelos A/B/C/D da frase de contagem de licenças -- FATO por obra, não
+  # estilo (GUIA_DE_REDACAO.md §7): 31/31 (100%) de cada obra usa sempre o
+  # MESMO modelo. road_registry.<obra>.ambiental_modelo_licencas escolhe qual.
+  s6_licencas_modelo_a:
+    classe: [E, TPL]
+    template: >-
+      No período de referência, o empreendimento possui {n_validas} atos
+      autorizativos ambientais válidos, todos com status de atendimento "No
+      prazo", sem registros de vencimentos iminentes ou pendências
+      documentais.
+    confirmado_em_relatorios: 30
+    fonte: "scripts/20_levantar_texto_gf1.py -- forma exclusiva da RD-101, 30/30 (100%), golden não se aplica (obra diferente)"
+
+  s6_licencas_modelo_b:
+    classe: [E, TPL]
+    template: >-
+      No período de referência, o empreendimento possui {n_solicitadas}
+      licenças solicitadas, sendo {n_emitidas} licenças emitidas, e
+      {n_pendentes} licenças com pendências documentais.
+    confirmado_em_relatorios: 22
+    fonte: "scripts/20_levantar_texto_gf1.py -- forma predominante da RD-102A, 22/30 (73%)"
+
+  s6_licencas_modelo_c:
+    classe: [E, TPL]
+    template: "No período de referência, o empreendimento possui {n_emitidas} licenças emitidas e {n_pendentes} licenças pendentes."
+    confirmado_em_relatorios: 25
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma predominante da RD-103, 25/29
+      (86%, golden RD103_RO049.1 excluído da contagem). É o modelo aplicável a
+      esta rodada (RD-103). {n_emitidas}/{n_pendentes} vêm de
+      figuras.ambiental.gerar_indices(...).provenance.road_specific_metrics
+      (emitidas/pendentes) -- mesma fonte já usada para a Figura 6, nunca
+      recalculado aqui.
+
+  s6_licencas_modelo_d:
+    classe: [E, TPL]
+    template: >-
+      No período de referência, o empreendimento possui {n_solicitadas}
+      licenças solicitadas, {n_no_prazo} com status de atendimento "No prazo",
+      e {n_pendentes} licenças com pendências documentais.
+    confirmado_em_relatorios: 27
+    fonte: "scripts/20_levantar_texto_gf1.py -- forma predominante da RD-104, 27/30 (90%)"
+
+  # condicionantes (Figura 7) -- estrutura condicional (há/não há pendência),
+  # com o CONECTOR ("no momento,"/"neste período"/"durante o período,") e a
+  # preposição ("do"/"ao vencimento") vindos de road_registry por obra.
+  s6_condicionantes_negativa:
+    classe: [C, TPL]
+    template: >-
+      O painel da figura {n} destaca as condicionantes que possuem entregas com
+      prazos definidos, garantindo o cumprimento integral das exigências
+      estabelecidas no processo de licenciamento ambiental. É possível observar
+      que {conector} não há condicionantes pendentes ou próximas {preposicao}
+      vencimento.
+    confirmado_em_relatorios: 62
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma negativa (sem condicionante
+      pendente), 62/119 (52%) das ocorrências desta frase (é um fato real da
+      semana, não uma inconsistência de redação -- por isso a divisão é
+      quase meio a meio, ao contrário das demais frases desta seção); {conector} e
+      {preposicao} vêm de road_registry.<obra>.ambiental_conector_condicionantes
+      / ambiental_condicionantes_preposicao_vencimento (100% consistente por
+      obra: RD-101/RD-102A "no momento,"; RD-103 "neste período" sem vírgula;
+      RD-104 "durante o período,"; preposição "do" em 3 obras, "ao" só na RD-102A).
+
+  # v0.3, HISTORICAL_SHADOW: as duas formas abaixo (positiva/negativa) AFIRMAM
+  # um fato sobre o acervo de condicionantes -- "há N próximas do vencimento"
+  # ou "não há". Nenhuma das duas é emitível ao reconstruir uma semana
+  # passada, porque o status é função da data de hoje sobre um acervo que
+  # também mudou (ver config/generation_modes.yaml). Esta entrada é o PREFIXO
+  # LITERAL comum às duas -- a parte descritiva do painel, que não afirma
+  # nada sobre quantidade. Não é redação nova: é o mesmo texto do corpus sem
+  # a oração final.
+  s6_condicionantes_generica:
+    classe: [C, TPL]
+    template: >-
+      O painel da figura {n} destaca as condicionantes que possuem entregas com
+      prazos definidos, garantindo o cumprimento integral das exigências
+      estabelecidas no processo de licenciamento ambiental.
+    confirmado_em_relatorios: 119
+    fonte: >-
+      prefixo idêntico em 119/119 ocorrências da frase no corpus (golden
+      excluído) -- é o que sobra de s6_condicionantes_positiva /
+      s6_condicionantes_negativa quando a oração final é omitida.
+
+  s6_condicionantes_positiva:
+    classe: [C, TPL]
+    template: >-
+      O painel da figura {n} destaca as condicionantes que possuem entregas com
+      prazos definidos, garantindo o cumprimento integral das exigências
+      estabelecidas no processo de licenciamento ambiental. É possível observar
+      que {conector} há {n_atencao} condicionantes próximas {preposicao}
+      vencimento.
+    confirmado_em_relatorios: 57
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma positiva, 57/119 (48%);
+      {n_atencao} = soma de "Pendente" + "Próximo do vencimento" em
+      figuras.ambiental.gerar_condicionantes(...).provenance.road_specific_metrics.contagem_por_status
+      (DADO-09 -- a 3ª categoria "Próximo do vencimento" só existe depois que
+      a Frente B corrigir o extrator; até lá esta frase soma o que a chave
+      trouxer, sem inventar categoria).
+    nota: >-
+      singular ("1 condicionante próxima") não tratado nesta rodada -- só
+      ocorreu 1/16 vezes no corpus (RD-102A) e fica como LIMITATION conhecida,
+      não bloqueante para a RD-103.
+
+  # --- Seção 7, TEXTO-03 -- histórico (data por obra, road_registry) +
+  # formalização/assinatura + "encontra-se anexo".
+  s7_historico_formato:
+    classe: [A, TPL]
+    template: >-
+      O Diário de Obras passou por uma atualização em seu formato de registro.
+      Até o dia {data_fim_fisico}, os registros eram realizados de forma
+      física, por meio de anotações em papel. A partir de {data_inicio_digital},
+      passou a ser adotado o formato digital, com os lançamentos feitos
+      diretamente no sistema.
+    confirmado_em_relatorios: 80
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- 80/80 (100%) dos relatórios legíveis
+      nas 4 obras, golden excluído. {data_fim_fisico}/{data_inicio_digital} são
+      FATO por obra (GUIA_DE_REDACAO.md §7, "o que NÃO padronizar"): RD-101
+      migrou em 25/04/2026, as outras 3 em 21/04/2026 -- confirmado 20/20 em
+      cada obra. Vêm de road_registry.<obra>.diario_migracao_fisico_ate /
+      diario_migracao_digital_desde, nunca hardcoded.
+
+  s7_formalizacao_assinatura:
+    classe: A
+    texto: >-
+      Esse documento é submetido à assinatura dos engenheiros responsáveis
+      técnicos pela empresa executora e pela empresa estruturadora do
+      consórcio, formalizando e validando os registros realizados ao longo da
+      semana.
+    confirmado_em_relatorios: 71
+    fonte: "scripts/20_levantar_texto_gf1.py -- 71/80 (89%), golden excluído; é a 2ª frase do mesmo parágrafo de s7_texto_base"
+
+  # a vírgula antes de "encontra-se" NÃO é ruído de digitação: é 100%
+  # consistente DENTRO de cada obra (RD-101/RD-104 nunca usam vírgula,
+  # RD-102A/RD-103 quase sempre usam) -- por isso, ao contrário do que a
+  # primeira leitura desta rodada concluiu (tratar como erro de pontuação e
+  # padronizar globalmente sem vírgula), é FORMA POR OBRA como as demais desta
+  # seção: road_registry.<obra>.diario_anexo_com_virgula escolhe a variante.
+  s7_diario_anexo_sem_virgula:
+    classe: A
+    texto: "O Diário de Obras correspondente ao período abrangido por este relatório encontra-se anexo ao presente documento."
+    confirmado_em_relatorios: 22
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma da RD-101 (9/14, maioria) e da
+      RD-104 (13/13, 100%); road_registry.<obra>.diario_anexo_com_virgula=false.
+      Não confundir com os casos (fato, não forma) de relatório que cobre 2
+      períodos ("e pelo relatório da semana passada") -- ficam fora do escopo
+      desta rodada, não ocorrem na semana da RD-103 em comparação.
+
+  s7_diario_anexo_com_virgula:
+    classe: A
+    texto: "O Diário de Obras correspondente ao período abrangido por este relatório, encontra-se anexo ao presente documento."
+    confirmado_em_relatorios: 19
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma da RD-103 (11/13, 85%; 4/4 no
+      subconjunto CURRENT/v3, golden excluído) e majoritária na RD-102A (8/14);
+      road_registry.<obra>.diario_anexo_com_virgula=true. É a forma aplicável
+      a esta rodada (RD-103).
+
+  s7_diario_nao_assinado:
+    classe: TPL
+    template: >-
+      Contudo, até a data de sua emissão, o referido documento não havia sido
+      formalmente assinado pela empresa executora. Dessa forma, o Diário de
+      Obras segue apresentado sem a devida anuência da construtora, sendo que a
+      versão devidamente assinada será encaminhada e anexada ao relatório
+      subsequente.
+    confirmado_em_relatorios: 6
+    nota: >-
+      condicional (6/55, 11% dos casos com o Diário ainda não assinado no
+      fechamento do relatório) -- registrada aqui para o catálogo ficar
+      completo, mas NÃO ligada ao content_builder.py nesta rodada: não há
+      hoje, em report_data, um campo que informe se o Diário da semana já foi
+      assinado (fora do orçamento desta fatia). content_builder emite sempre
+      s7_diario_anexo (a forma "assinado", 89% dos casos observados,
+      inclusive a semana da RD-103 em comparação); ligar esta frase quando o
+      dado existir é trabalho futuro, não regressão desta rodada.
+
+  # --- Seção 8.3, TEXTO-04 -- definição de status + frases-ponte dos
+  # Gráficos 2 e 3. A definição tem 2 formas por obra (genérica x com número
+  # embutido); RD-101 e RD-103 usam SEMPRE a genérica (64/64, 100% nas duas),
+  # por isso é a adotada -- é também a forma que serve de template geral (não
+  # há redação genérica alternativa que sirva às 4 obras sem embutir dado).
+  s8_3_status_definicao:
+    classe: A
+    texto: >-
+      O status e a classificação do histórico de notificações evidenciam
+      diferentes estágios de tratamento das ocorrências: aquelas registradas
+      como "Encerrada" indicam que a notificação encaminhada ao Parceiro foi
+      devidamente sanada pela notificada, com a implementação das ações
+      corretivas necessárias e comprovação por meio de evidências documentais
+      ou inspeções em campo; as notificações classificadas como "Aberta"
+      correspondem às notificações já encaminhadas ao Parceiro, mas que
+      permanecem sem resposta ou sem registro de ação corretiva por parte da
+      executora até o presente momento; por fim, as notificações em status
+      "Aguardando evidências" referem-se a casos em que a executora informou a
+      adoção de medidas corretivas, porém ainda não apresentou comprovações da
+      efetiva execução das ações, mantendo a ocorrência em análise até que
+      seja validada.
+    confirmado_em_relatorios: 64
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma genérica (sem número
+      embutido): 100% na RD-101 (32/32) e na RD-103 (32/32, golden excluído);
+      minoritária na RD-102A (14/32, 44%) e na RD-104 (16/32, 50%), que às
+      vezes embutem a contagem real na própria definição -- variante de obra
+      registrada, não adotada nesta rodada (fora do escopo de GF-1, que pede
+      "parágrafo de definição dos status", não uma 2ª família de template).
+
+  s8_3_grafico2_ponte:
+    classe: [C, TPL]
+    template: "O Gráfico {n} apresenta a distribuição de não conformidades por status, sendo {distribuicao_status}."
+    confirmado_em_relatorios: 0
+    nota: >
+      forma "O Gráfico {n}" (numerada) é universal nas 4 obras para ESTE
+      gráfico especificamente (87/87 dos casos golden-excluídos onde a frase
+      foi encontrada) -- diferente do Gráfico 3 (ver
+      nc_grafico3_estilo_referencia). {distribuicao_status} é construído pelo
+      content_builder a partir de nonconformities.history_by_status (mesma
+      chave já usada pela Tabela de histórico), na ordem Aberta, Aguardando
+      Projeto Executivo, Cancelada, Em Análise, Aguardando Evidências,
+      Encerrada -- só entram categorias com contagem > 0 (padrão observado em
+      23/27 variantes do corpus; a 4ª ordem, com Em Análise depois de
+      Aguardando Evidências, é minoritária e não reproduzida). Não tem
+      confirmado_em_relatorios de FORMA porque a frase inteira nunca se repete
+      literalmente (a contagem muda toda semana) -- o que é fixo é a
+      ARMAÇÃO da frase e a ordem das categorias, ambos confirmados acima.
+
+  s8_3_grafico3_ponte_numero:
+    classe: A
+    texto: >-
+      O Gráfico {n} apresenta a distribuição das não conformidades
+      classificadas como em aberto ou aguardando evidências, organizadas
+      conforme sua natureza.
+    confirmado_em_relatorios: 53
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma "O Gráfico {n}" (numerada):
+      predominante na RD-101 (31/32, 97%); road_registry.<obra>.nc_grafico3_estilo_referencia
+      escolhe entre esta e s8_3_grafico3_ponte_a_seguir por obra.
+
+  s8_3_grafico3_ponte_a_seguir:
+    classe: A
+    texto: >-
+      O gráfico a seguir apresenta a distribuição das não conformidades
+      classificadas como em aberto ou aguardando evidências, organizadas
+      conforme sua natureza.
+    confirmado_em_relatorios: 63
+    fonte: >-
+      scripts/20_levantar_texto_gf1.py -- forma "a seguir": predominante na
+      RD-102A (21/32, 66%), RD-104 (21/32, 66%) e forma própria da RD-103
+      (é o modelo aplicável a esta rodada, RD-103).
