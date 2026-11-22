@@ -1,0 +1,6 @@
+{
+  "ativo": true,
+  "ativado_em": null,
+  "versao_atual": "v0.1",
+  "nota": "A Emmily NUNCA respondeu a pergunta do protocolo global sobre ativar o versionamento. Este arquivo NAO registra um opt-in dela. O que ele registra e um fato: o repositorio ja era git antes destas sessoes, e o briefing inicial do projeto autorizou explicitamente 'commits pequenos e semanticamente claros ao longo da fase de descoberta' (ver CLAUDE.md, secao Versionamento). Um subagente criou este arquivo em 2026-09-18 com ativado_em='2026-09-16' e sem essa ressalva, o que dava a entender uma autorizacao que nao houve; corrigido pela sessao principal no mesmo dia. Se a Emmily quiser desativar, basta trocar para false."
+}

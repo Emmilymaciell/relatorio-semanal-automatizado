@@ -1,0 +1,209 @@
+# =============================================================================
+# visual_style_v3.yaml — FONTE ÚNICA do design system do renderer v2 (P1.0,
+# FASE3_2B_RENDERER_V2_SPEC.md). Proibido número mágico espalhado pelo
+# renderer: toda medida (mm), cor (hex) e nome de fonte usados por
+# `scripts/gerador/renderers/docx_renderer_v2.py` vêm DESTE arquivo.
+#
+# Autoridade visual: docs/visual_review/GOLDEN_VISUAL_SPEC.md (valores
+# medidos no OOXML/render do golden). Este YAML só formaliza os valores já
+# decididos lá — não inventa nada novo.
+#
+# Unidade de todas as medidas de comprimento: milímetros (mm), convertidas
+# pelo renderer para EMU (Pt/Cm/Mm do python-docx) ou twips (dxa), conforme o
+# destino. Não há "if obra ==" aqui nem no renderer -- estilo é o MESMO para
+# as 4 obras; o que difere por obra (titulo_secao_9 etc.) continua em
+# road_registry.yaml.
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-17
+  resolve: [P1.0, P1.1, P1.2, P1.3, P1.4, P1.5, P1.6, P1.7, P1.8, P1.9, P1.10, P1.11, P1.12, P1.13]
+  fase: "3.2B — P1 design system"
+  fonte_autoridade: docs/visual_review/GOLDEN_VISUAL_SPEC.md
+
+# -----------------------------------------------------------------------------
+# P1.13 -- Arial em tudo, inclusive indice e rodape (GOLDEN_INTERNAL_VARIATION
+# do golden -- ele usa Aptos ali por omissao de override; nao reproduzir).
+# -----------------------------------------------------------------------------
+fonts:
+  principal: "Arial"
+
+# -----------------------------------------------------------------------------
+# P1.5 / P1.6 -- cores (hex sem '#', como aparecem no w:color/w:shd do OOXML)
+# -----------------------------------------------------------------------------
+colors:
+  texto_corpo: "000000"
+  titulo: "000000"          # H1/H2/H3 -- resolve a Q-5: pretos, nao azuis
+  legenda: "0D0D0D"          # P1.10
+  tabela_clima_shading: "F2F2F2"  # P1.9, coluna de rotulos
+
+# -----------------------------------------------------------------------------
+# P1.1 -- pagina e margens por PERFIL de secao (mm): topo, direita, base, esquerda
+# (mesma ordem do document_model.Section.page_profile: cover/body/photo)
+# -----------------------------------------------------------------------------
+page:
+  a4_mm: {width: 210.0, height: 297.0}
+  a3_mm: {width: 297.0, height: 420.0}
+
+margins_mm:
+  cover_a4: {top: 25, right: 30, bottom: 25, left: 30}
+  body_a4:  {top: 30, right: 20, bottom: 20, left: 30}
+  photo_a3: {top: 30, right: 20, bottom: 20, left: 30}
+
+header_distance_mm: 12.5
+footer_distance_mm: 12.5
+gutter_mm: 0
+
+# -----------------------------------------------------------------------------
+# P1.2 -- cabecalho: 2 logos + linha, SEM coordenada absoluta. O renderer
+# calcula `usable_width = page_width - left - right` DA PROPRIA SECAO e
+# deriva a posicao do logo direito e o comprimento da linha a partir dela
+# (formula documentada em assets/logos/README.md) -- os valores aqui sao só
+# os TAMANHOS impressos dos logos e a espessura da linha, nunca uma posicao.
+# -----------------------------------------------------------------------------
+header:
+  logo_parceiro:
+    arquivo: "assets/logos/logo_parceiro.png"
+    largura_mm: 41.1
+    altura_mm: 13.7
+  logo_prog:
+    arquivo: "assets/logos/logo_prog.png"
+    largura_mm: 21.9
+    altura_mm: 11.7
+  linha_espessura_pt: 0.4
+
+# -----------------------------------------------------------------------------
+# P1.3 -- capa: titlePg=true (sem cabecalho/rodape) -- ver page_profile=="cover"
+# no renderer; nao ha valores extras aqui, a flag e' estrutural.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# P1.4 -- rodape: campo PAGE real, alinhado a direita, Arial.
+# -----------------------------------------------------------------------------
+footer:
+  fonte_pt: 11
+  alinhamento: "right"
+
+# -----------------------------------------------------------------------------
+# P1.5 -- corpo
+# -----------------------------------------------------------------------------
+body:
+  fonte_pt: 11
+  cor: "000000"
+  alinhamento: "justify"
+  entrelinha: 1.5
+  espaco_depois_pt: 0
+
+# -----------------------------------------------------------------------------
+# P1.6 -- titulos. Recuo esquerdo de H1 e' o valor medido no golden (12,7mm).
+# H2/H3 nao tem valor medido no golden (ele nao usa estilos dedicados -- ver
+# GOLDEN_VISUAL_SPEC.md §2.4): aqui o shadow e' deliberadamente MELHOR
+# (estilos H2/H3 de verdade), com recuo progressivo de 6,35mm por nivel
+# (1/4 polegada), decisao de design registrada aqui, nao um numero magico
+# solto no renderer.
+# -----------------------------------------------------------------------------
+h1: {fonte_pt: 16, cor: "000000", recuo_esquerdo_mm: 12.7, keep_next: true, keep_lines: true}
+h2: {fonte_pt: 14, cor: "000000", recuo_esquerdo_mm: 19.05, keep_next: true, keep_lines: true}
+h3: {fonte_pt: 12, cor: "000000", recuo_esquerdo_mm: 25.4, keep_next: true, keep_lines: true}
+
+# -----------------------------------------------------------------------------
+# P1.7 -- numeracao automatica multinivel (numbering.xml ligado ao NIVEL do
+# estilo -- nunca prefixo de string). "1.", "5.1.", "5.2.1." etc. Os niveis 0/
+# 1/2 do numId correspondem a heading level=1/2/3 do document_model.
+# -----------------------------------------------------------------------------
+numbering:
+  niveis:
+    - {ilvl: 0, formato: decimal, texto: "%1."}
+    - {ilvl: 1, formato: decimal, texto: "%1.%2."}
+    - {ilvl: 2, formato: decimal, texto: "%1.%2.%3."}
+
+# -----------------------------------------------------------------------------
+# P1.8 -- indice: tab stops por nivel (mm), leader "dot". 149,8mm = tab
+# direito (numero de pagina), igual nos 3 niveis; só o tab esquerdo muda.
+# -----------------------------------------------------------------------------
+toc:
+  fonte_pt: 12
+  espaco_depois_pt: 5
+  tab_direito_mm: 149.8
+  leader: "dot"
+  niveis:
+    - {nivel: 1, tab_esquerdo_mm: 8.47}
+    - {nivel: 2, tab_esquerdo_mm: 12.7}
+    - {nivel: 3, tab_esquerdo_mm: 16.93}
+
+# -----------------------------------------------------------------------------
+# P1.9 -- tabela do clima: 8 colunas (rotulo + 7 dias), larguras reais mm.
+# -----------------------------------------------------------------------------
+tabela_clima:
+  larguras_mm: [15, 20, 20, 20, 22.5, 25, 20, 20]
+  borda_pt: 0.5
+  shading_coluna_rotulo: "F2F2F2"
+
+# -----------------------------------------------------------------------------
+# Fase 3.3, Sec.3.3 -- tabela de status de NC: MESMO tratamento da tabela do
+# clima (bordas 0,5pt, cabecalho sombreado F2F2F2, Arial). 2 colunas
+# (Status/Quantidade); larguras coerentes com o conteudo -- "Status" leva
+# rotulos longos ("Aguardando Projeto Executivo"), "Quantidade" e' so um
+# numero -- soma 160mm (largura util do corpo A4), nao 80/80mm uniforme
+# (o que o Checkpoint 3.2B apontou como inconsistente/sem tratamento).
+# -----------------------------------------------------------------------------
+tabela_nc:
+  larguras_mm: [120, 40]
+  borda_pt: 0.5
+  shading_cabecalho: "F2F2F2"
+
+# -----------------------------------------------------------------------------
+# P1.10 -- legendas (Figura/Grafico/Tabela), padrao predominante do golden.
+# -----------------------------------------------------------------------------
+captions:
+  fonte_pt: 10
+  cor: "0D0D0D"
+  alinhamento: "center"
+
+# -----------------------------------------------------------------------------
+# P1.12 -- compatibilidade: Word 2013+ (evita "Modo de Compatibilidade").
+# -----------------------------------------------------------------------------
+compatibility_mode: 15
+
+# -----------------------------------------------------------------------------
+# Fase 3.4 (v0.2), CONFIG FIX VIS-07 -- lista de anexos (seção 11): o CURRENT
+# usa parágrafos simples "Anexo N – Título", alinhados à margem esquerda, SEM
+# marcador de lista, com respiro entre eles (GOLDEN_VISUAL_SPEC.md §8: "~28pt
+# de respiro"). Aplicado ao Block paragraph com role="anexos_item".
+# -----------------------------------------------------------------------------
+anexos:
+  espaco_depois_pt: 28
+  alinhamento: "left"
+
+# -----------------------------------------------------------------------------
+# Fase 3.4 (v0.2), item 4 do plano -- política de quebra de página entre
+# SECOES CONSECUTIVAS do MESMO perfil físico (page_setup/page_profile).
+# Quando o perfil físico muda (A4<->A3), o Word sempre abre uma nova seção
+# física e a página muda sozinha -- esta lista NÃO se aplica a essas
+# transições, só a duas Sections seguidas com o MESMO perfil.
+#
+# Evidência (GOLDEN_VISUAL_SPEC.md + comparison_v0.1.json ESTR-04/PAG-01): o
+# golden AGRUPA na mesma página física:
+#   - seção 4 (Unifilar) + seção 5/5.1 (Execução de Obra / Clima) + o início
+#     da 5.2 (heading + intro fixo, sem o painel fotográfico ainda)  -- p6
+#   - seção 7 (Diário de Obras) + seção 8 (Não Conformidades)         -- 2 págs
+#   - seção 9 (Interferências) + seção 10 (Termo de Encerramento)     -- p15
+# o candidate, até esta rodada, forçava quebra de página ANTES de toda
+# Section (P1 não tinha essa política) -- daí as ~3 páginas a mais que o
+# golden. O agrupamento "5.2 intro" é resolvido em content_builder.py (o
+# heading e o parágrafo fixo da seção 5.2 entram na MESMA Section A4 de
+# §4/§5, não na Section A3 do painel) -- aqui só entram os pares que
+# permanecem no MESMO perfil físico.
+#
+# `sem_quebra_antes`: ids de Section (document_model) que NÃO recebem
+# `doc.add_page_break()` antes de si -- fluem direto após o bloco anterior,
+# na mesma página física. Todo id fora desta lista mantém o comportamento
+# anterior (quebra de página antes), o padrão mais seguro quando não há
+# evidência de agrupamento no golden.
+# -----------------------------------------------------------------------------
+paginacao:
+  sem_quebra_antes:
+    - s5_execucao_obra       # agrupa com s4_unifilar (4+5 na mesma página, p6)
+    - s8_nao_conformidades   # agrupa com s7_diario_obras (7+8)
+    - s10_termo_encerramento # agrupa com s9_interferencias (9+10, p15)

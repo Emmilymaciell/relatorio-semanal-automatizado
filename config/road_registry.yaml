@@ -1,0 +1,276 @@
+# =============================================================================
+# road_registry.yaml — cadastro mestre por obra
+#
+# Contém os dados de CLASSE B: variam entre rodovias, mas não variam a cada
+# semana. Extraídos e conferidos nas capas e nos termos de encerramento dos
+# 8 relatórios da amostra (semanas 2026-08-22..08-28 e 2026-08-29..09-04).
+#
+# Confiança: CONFIRMADO para todos os campos marcados `fonte: capa` ou
+# `fonte: termo_encerramento` — valor idêntico nos 2 relatórios da obra.
+#
+# ATENÇÃO: as grafias abaixo são as REAIS encontradas nos documentos, com as
+# inconsistências preservadas de propósito (ver `grafias_observadas`). A
+# padronização é decisão da Emmily — ver docs/mapeamento/14_perguntas_para_emmily.md
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-16
+  base: amostra de 8 relatórios (regime vigente)
+  regime_calendario: sabado_sexta        # válido a partir de 2026-01-03
+  cidade_emissao: Cidade                # idêntica nas 4 obras
+  contratante: Parceiro
+  contrato_prog: "000/0000"               # contrato do Programa, citado na Apresentação
+
+obras:
+
+  RD101:
+    pasta_sharepoint: RD101
+    rodovia: "RD-101"                    # como aparece na capa
+    rodovia_sem_hifen: "RD101"           # como aparece no termo de encerramento
+    trecho: "MUNICÍPIO A / ENTR. RD-201 / 330"   # FICTÍCIO (versão pública)
+    trecho_extenso: "Município A / Entr. Rd-201 / 330"
+    extensao_km: 40.00
+    extensao_texto: "40,00 km"
+    codigo_sre: ["101ERD0120"]
+    lote: "ÚNICO"
+    empresa_executora_capa: "Executora A"
+    empresa_executora_contrato: "Executora A"   # termo de encerramento
+    empresa_executora_sigla: "EXA"       # usada na Apresentação
+    empresa_supervisora: "Consórcio Supervisor A (Órgão Contratante)"
+    contrato_obra: "001/2025"
+    instrumento_convocacao: "01/2025"
+    contrato_assinado_em: 2025-09-10
+    ordem_servico: "01/2025"
+    ordem_servico_em: 2025-09-19
+    # --- numeração ---
+    ancora_semana_1: 2025-10-04          # sábado projetado; nº = (inicio - ancora)/7 + 1
+    primeira_semana_real: 2025-10-01     # regime 1, formato antigo
+    # --- layout específico ---
+    formato_unifilar: "A0 paisagem"
+    titulo_secao_4: "UNIFILAR"
+    titulo_secao_5_1: "Condições climáticas do período:"
+    titulo_secao_8_1: "Não conformidades emitidas pela Programa no período:"
+    titulo_secao_9: "RELATO DE RISCOS E INTERFERÊNCIAS EM CAMPO"
+    legenda_foto: "Relatório fotográfico RD-101."
+    tem_tabela_bueiros: true             # única obra com "Tabela 1 - Bueiros projetados"
+    # --- Fase 3.4 (v0.2), GF-1: fatos por obra que a seção 7 (Diário de Obras)
+    #     e a seção 6 (Ambiental) citam -- FATO, não redação (GUIA_DE_REDACAO.md
+    #     §7): a migração do diário para digital NÃO ocorreu na mesma data nas
+    #     4 obras. Levantado do corpus (output/extracao/texto/, golden
+    #     excluído): 20/20 relatórios RD-101 legíveis trazem esta mesma data.
+    diario_migracao_fisico_ate: 2026-04-24
+    diario_migracao_digital_desde: 2026-04-25
+    # a "frase de contagem de licenças" (seção 6) tem uma redação PRÓPRIA por
+    # obra no corpus inteiro (31/31 relatórios RD-101, 100%) -- não é estilo
+    # livre, é um modelo fixo por obra; ver config/textos_v3.yaml
+    # s6_licencas_modelo_* para o texto de cada letra.
+    ambiental_modelo_licencas: A
+    # idem para o conector da frase das condicionantes (Figura 7): "no
+    # momento," em 16/17 RD-101 (94%).
+    ambiental_conector_condicionantes: "no momento,"
+    ambiental_condicionantes_preposicao_vencimento: "do"
+    nc_grafico3_estilo_referencia: "numero"   # "O Gráfico 3 apresenta..." (31/32, 97%)
+    diario_anexo_com_virgula: false   # "...relatório encontra-se anexo" (9/14, maioria) -- ver s7_diario_anexo_* em textos_v3.yaml
+    # TEXTO-01 (v0.3): esta obra emite a frase-ponte para o Gráfico 1.
+    # Corpus, golden excluído: 23 com / 3 sem (scripts/24_levantar_frase_ponte_s3.py).
+    s3_frase_ponte_grafico: true
+    grafias_observadas:
+      arquivo: "RO_NNN.1 - RD-101.{docx,pdf}"
+
+  RD102A:
+    pasta_sharepoint: RD102A
+    rodovia: "RD-102 A"                  # capa grafa com espaço antes do A
+    rodovia_sem_hifen: "RD102A"
+    trecho: "Entr. BR-000 / Entr. RD-202"   # FICTÍCIO (versão pública)
+    trecho_extenso: "Entr. BR-000/Entr. RD-202"
+    extensao_km: 35.00
+    extensao_texto: "35,00km"
+    codigo_sre: ["102ERD0100", "102ERD0080"]
+    lote: "A"
+    empresa_executora_capa: "EXECUTORA B –"   # truncado na capa
+    empresa_executora_contrato: "Consórcio Executora B"
+    empresa_supervisora: "CONSÓRCIO SUPERVISOR B (Órgão Contratante)"
+    contrato_obra: "002/2025"
+    # --- §7 (Fase 3, Slice 3) -- preenchido em 2026-09-17 por busca pontual em
+    #     2_Documentacao Licitatoria\3_Contrato Executora\ (NÃO do golden; ver
+    #     contrato_provenance). contrato_assinado_em NÃO comprovado -- fica
+    #     NOT_FOUND/HITL (ver contrato_provenance.contrato_assinado_em).
+    instrumento_convocacao: "02/2025"
+    ordem_servico: "02/2025"
+    ordem_servico_em: 2025-08-27
+    ancora_semana_1: 2025-09-27
+    primeira_semana_real: 2025-09-10
+    formato_unifilar: "A3 paisagem"      # EXCEÇÃO: as outras 3 usam A0
+    titulo_secao_4: "DIAGRAMA UNIFILAR"
+    titulo_secao_5_1: "Condições climáticas do período:"
+    titulo_secao_8_1: "Não conformidades emitidas pela Programa no período:"
+    titulo_secao_9: "RELATO DE INTERFERÊNCIAS EM CAMPO"
+    legenda_foto: "Relatório fotográfico RD-102A."
+    tem_tabela_bueiros: false
+    # --- Fase 3.4 (v0.2), GF-1: ver nota equivalente em RD101 acima. 20/20
+    #     relatórios RD-102A legíveis (golden excluído) trazem esta data.
+    diario_migracao_fisico_ate: 2026-04-20
+    diario_migracao_digital_desde: 2026-04-21
+    ambiental_modelo_licencas: B
+    ambiental_conector_condicionantes: "no momento,"
+    ambiental_condicionantes_preposicao_vencimento: "ao"   # única obra: "ao vencimento", não "do"
+    nc_grafico3_estilo_referencia: "a_seguir"   # "O gráfico a seguir apresenta..." (21/32, 66%)
+    diario_anexo_com_virgula: true   # "...relatório, encontra-se anexo" (8/14, maioria) -- única obra que diverge da RD-101/RD-104
+    # TEXTO-01 (v0.3): esta obra NÃO emite a frase-ponte para o Gráfico 1.
+    # Corpus, golden excluído: 6 com / 20 sem (scripts/24_levantar_frase_ponte_s3.py).
+    s3_frase_ponte_grafico: false
+    grafias_observadas:
+      arquivo: "RO_NNN.1 - RD- 102A.{docx,pdf}"   # espaço após o hífen
+    contrato_provenance:
+      instrumento_convocacao:
+        arquivo: "RD102A\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        pagina: 1
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico:
+        arquivo: "RD102A\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico_em:
+        arquivo: "RD102A\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      contrato_assinado_em:
+        status: NOT_FOUND
+        motivo: "bloco de assinatura do contrato não extraível do PDF; fica NOT_FOUND + HITL (detalhe omitido na versão pública)"
+
+  RD103:
+    pasta_sharepoint: RD103
+    rodovia: "RD-103"
+    rodovia_sem_hifen: "RD103"
+    trecho: "Fim da Pavimentação/ ENTR. RD-202"   # FICTÍCIO (versão pública)
+    trecho_extenso: "Fim da Pavimentação até ENTR. RD-202"
+    extensao_km: 30.00
+    extensao_texto: "30,00 km"
+    codigo_sre: ["103ERD0045"]
+    lote: "Único"
+    empresa_executora_capa: "Executora C"
+    empresa_executora_contrato: "Executora C"
+    empresa_supervisora: "Consórcio Supervisor B (Órgão Contratante)"
+    contrato_obra: "003/2025"
+    # --- §7 (Fase 3, Slice 3) -- preenchido em 2026-09-17, mesma ressalva da RD102A
+    #     (ver contrato_provenance): contrato_assinado_em NÃO comprovado -- NOT_FOUND/HITL.
+    instrumento_convocacao: "03/2025"
+    ordem_servico: "03/2025"
+    ordem_servico_em: 2025-08-29        # data da ASSINATURA DIGITAL, não a digitada no corpo
+    ancora_semana_1: 2025-09-27
+    primeira_semana_real: 2025-09-10
+    formato_unifilar: "A0 paisagem"
+    titulo_secao_4: "DIAGRAMA UNIFILAR"
+    titulo_secao_5_1: "Dados climáticos do período:"      # única que diz "Dados"
+    titulo_secao_8_1: "Não conformidades emitidas pelo Programa no período:"   # "pelo"
+    titulo_secao_9: "RELATO DE INTERFERÊNCIA EM CAMPO"    # singular
+    legenda_foto: "Relatório fotográfico RD-103"
+    tem_tabela_bueiros: false
+    # --- Fase 3.4 (v0.2), GF-1: ver nota equivalente em RD101 acima. 20/20
+    #     relatórios RD-103 legíveis (golden RO_049.1 excluído) trazem esta
+    #     data -- mesma da RD-102A/RD-104, RD-101 é a única com data diferente.
+    diario_migracao_fisico_ate: 2026-04-20
+    diario_migracao_digital_desde: 2026-04-21
+    ambiental_modelo_licencas: C
+    ambiental_conector_condicionantes: "neste período"   # única obra sem vírgula depois
+    ambiental_condicionantes_preposicao_vencimento: "do"
+    nc_grafico3_estilo_referencia: "a_seguir"   # forma própria da RD-103 ("O gráfico a seguir apresenta...")
+    diario_anexo_com_virgula: true   # "...relatório, encontra-se anexo" (11/13, 85%, 4/4 no subconjunto v3) -- forma desta obra
+    # TEXTO-01 (v0.3): esta obra emite a frase-ponte para o Gráfico 1.
+    # Corpus, golden excluído: 22 com / 3 sem (scripts/24_levantar_frase_ponte_s3.py).
+    s3_frase_ponte_grafico: true
+    grafias_observadas:
+      arquivo: "RO_NNN.1 - RD-103.{docx,pdf}"
+      pasta_auxiliares: "Arquivos Auxiliares"   # única com A maiúsculo
+    contrato_provenance:
+      instrumento_convocacao:
+        arquivo: "RD103\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        pagina: 1
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico:
+        arquivo: "RD103\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico_em:
+        arquivo: "RD103\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        valor: 2025-08-29
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+        metodo: "data da assinatura digital do PDF, não a data digitada no corpo"
+        divergencia: "[detalhe omitido na versão pública]"
+        confirmacao_cruzada: "[detalhe omitido na versão pública]"
+        nota: "[detalhe omitido na versão pública]"
+      contrato_assinado_em:
+        status: NOT_FOUND
+        motivo: "bloco de assinatura do contrato não extraível do PDF; fica NOT_FOUND + HITL (detalhe omitido na versão pública)"
+
+  RD104:
+    pasta_sharepoint: RD104
+    rodovia: "RD-104"
+    rodovia_sem_hifen: "RD104"
+    trecho: "Município B / Entr. RD-203 / Entr. RD-204"   # FICTÍCIO (versão pública)
+    trecho_extenso: "Entr. RD-204 – Entr. RD-203 (Município B)"
+    extensao_km: 50.00
+    extensao_texto: "50,00 km"
+    codigo_sre: ["104ERD0070"]
+    lote: "Único"
+    empresa_executora_capa: "Consórcio Executora D"
+    empresa_executora_contrato: "Consórcio Executora D"   # sem hífen no termo
+    empresa_supervisora: "Consórcio Supervisor C"
+    contrato_obra: "004/2025"
+    # --- §7 (Fase 3, Slice 3) -- preenchido em 2026-09-17 por busca pontual em
+    #     2_Documentacao Licitatoria\3_Contrato Executora\ (ver contrato_provenance).
+    #     ÚNICA das 3 obras em que o contrato tem bloco de assinatura textual
+    #     extraível dentro do próprio PDF do contrato.
+    instrumento_convocacao: "04/2025"
+    contrato_assinado_em: 2025-09-16
+    ordem_servico: "04/2025"
+    ordem_servico_em: 2025-09-29
+    ancora_semana_1: 2025-11-08
+    primeira_semana_real: 2025-11-07
+    formato_unifilar: "A0 paisagem"
+    titulo_secao_4: "UNIFILAR"
+    titulo_secao_5_1: "Condições climáticas do período:"
+    titulo_secao_8_1: "Não conformidades emitidas pela Programa no período:"
+    titulo_secao_9: "RELATO DE INTERFERÊNCIAS EM CAMPO"
+    legenda_foto: "Relatório fotográfico de {servico}"   # única que nomeia o serviço
+    tem_tabela_bueiros: false
+    # --- Fase 3.4 (v0.2), GF-1: ver nota equivalente em RD101 acima. 20/20
+    #     relatórios RD-104 legíveis (golden excluído) trazem esta data.
+    diario_migracao_fisico_ate: 2026-04-20
+    diario_migracao_digital_desde: 2026-04-21
+    ambiental_modelo_licencas: D
+    ambiental_conector_condicionantes: "durante o período,"
+    ambiental_condicionantes_preposicao_vencimento: "do"
+    nc_grafico3_estilo_referencia: "a_seguir"   # "O gráfico a seguir apresenta..." (21/32, 66%)
+    diario_anexo_com_virgula: false   # "...relatório encontra-se anexo" (13/13, 100%)
+    # TEXTO-01 (v0.3): esta obra NÃO emite a frase-ponte para o Gráfico 1.
+    # Corpus, golden excluído: 6 com / 20 sem (scripts/24_levantar_frase_ponte_s3.py).
+    s3_frase_ponte_grafico: false
+    grafias_observadas:
+      arquivo: "RO_NNN.1 - RD-104.{docx,pdf}"
+      pasta_relatorio_semanal: "4. Relatório Semanal de Obras"   # as outras: "Obras"
+    contrato_provenance:
+      instrumento_convocacao:
+        arquivo: "RD104\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      contrato_assinado_em:
+        arquivo: "RD104\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        pagina: 1
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico:
+        arquivo: "RD104\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+      ordem_servico_em:
+        arquivo: "RD104\\2_Documentacao Licitatoria\\3_Contrato Executora\\documento-ficticio.pdf"
+        trecho: "[trecho do documento-fonte omitido na versão pública]"
+
+# =============================================================================
+# CAMPOS AINDA DESCONHECIDOS (não descobertos nos documentos da amostra)
+# =============================================================================
+desconhecido:
+  - "RD102A/RD103: data de assinatura do CONTRATO em si (instrumento_convocacao e
+     ordem_servico/ordem_servico_em RESOLVIDOS em 2026-09-17, §7 -- ver
+     contrato_provenance de cada obra). O PDF do contrato dessas duas obras não
+     tem um bloco de assinatura textual extraível para o contrato propriamente
+     dito (só para a Declaração de Negociação anexa); ver
+     contrato_provenance.contrato_assinado_em.motivo em cada obra."
+  - "RD102A: nome completo da empresa executora na capa (aparece truncado)."
+  - "Municípios de cada obra — o campo TRECHO usa referências rodoviárias, não municípios."

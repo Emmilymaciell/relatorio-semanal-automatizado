@@ -1,0 +1,294 @@
+# =============================================================================
+# source_layout.yaml — onde mora cada fonte do Relatório Semanal, por padrão
+#
+# Resolve a diferença de nomenclatura de pastas entre as 4 obras SEM usar
+# `if obra == ...` no código: todo nome de pasta é resolvido por PREFIXO ou
+# igualdade NORMALIZADA (scripts/prog_util.norm — sem acento, minúsculo,
+# espaços colapsados), nunca por nome literal por obra.
+#
+# Evidência das variações (verificada nesta sessão, 2026-09-17):
+#   "4. Relatório Semanal Obras"          (RD101, RD102A, RD103)
+#   "4. Relatório Semanal de Obras"       (RD104)
+#   "Arquivos Auxiliares"                 (RD103 — A maiúsculo)
+#   "Arquivos auxiliares"                 (RD101, RD102A, RD104 — a minúsculo)
+#   "1. Ficha de campo" / "1. Fichas de Campo" / "1. Fichas de campo"
+#   "4. Diário de obras" / "4. Diário de Obras" / "4. Diários de Obra"
+#
+# Todas resolvidas aqui por PREFIXO normalizado, não por grafia exata.
+# =============================================================================
+
+meta:
+  versao: 1
+  gerado_em: 2026-09-17
+  criado_na: "Fase 3, Slice 1"
+  principio: "toda variação de nome de pasta é resolvida por prefixo/igualdade normalizados; zero condicional por obra"
+
+# -----------------------------------------------------------------------------
+# RAÍZES
+# -----------------------------------------------------------------------------
+raizes:
+  sharepoint: "C:\\caminho\\exemplo\\PastaSincronizada"
+  base_obras: "Programa - 3. Desenvolvimento\\G2 -  Engenharia"     # dois espaços antes de "Engenharia"
+  compartilhado: "Programa - 2. Compartilhado interno\\03_Gestao dos contratos"
+
+# -----------------------------------------------------------------------------
+# REGRA GERAL DE EXCLUSÃO — aplica-se a QUALQUER caminho descoberto
+# -----------------------------------------------------------------------------
+exclusao:
+  regra: "descartar qualquer segmento de caminho cujo texto normalizado contenha 'obsoleto'"
+  exemplos_conhecidos:
+    - "UNIFILAR OBSOLETO"
+    - "Avanço Global Mensal (OBSOLETO)"
+    - "Relatório Semanal (Obsoleto)"
+
+# -----------------------------------------------------------------------------
+# ÁRVORE POR OBRA — {BASE_OBRAS}\{pasta_obra}\3_Gestao Tecnica de Obra\...
+# `resolver_por` documenta a estratégia de resolução usada pelo source_discovery:
+#   prefixo_normalizado  -> primeira subpasta cujo nome normalizado começa com o prefixo dado
+#   igual_normalizado    -> primeira subpasta cujo nome normalizado é igual (após strip) a um dos valores
+#   glob_regex           -> primeira subpasta/arquivo cujo nome bate com a regex
+# -----------------------------------------------------------------------------
+arvore_por_obra:
+
+  pasta_gestao_tecnica:
+    caminho: "{base_obras}\\{pasta_obra}\\3_Gestao Tecnica de Obra"
+
+  pasta_notificacoes:
+    resolver_por: prefixo_normalizado
+    prefixo: "3. notifica"
+    sob: pasta_gestao_tecnica
+    subpastas_fixas: ["Not. Geradas"]
+    subpastas_emissor: ["BV", "Programa", "Supervisora"]
+
+  pasta_semanal_raiz:
+    resolver_por: prefixo_normalizado
+    prefixo: "4. relat"
+    sob: pasta_gestao_tecnica
+    nota: "nome varia: 'Relatório Semanal Obras' (RD101/102A/103) x 'Relatório Semanal de Obras' (RD104)"
+
+  pasta_fichas_campo:
+    resolver_por: prefixo_normalizado
+    prefixo: "1. ficha"
+    sob: pasta_semanal_raiz
+    nota: "'Ficha de campo' (singular) x 'Fichas de Campo' (plural, RD104)"
+    padrao_arquivo: '^(?P<data>\d{4}-\d{2}-\d{2})\s+Fichas?\s+de\s+[Cc]ampo\s+RD\s?\d+.*\.(xlsx|xlsm|pdf)$'
+    nota_padrao: "uma por dia COM execução; ausência de arquivo = dia sem execução"
+
+  pasta_ficha_acomp_semanal:
+    resolver_por: prefixo_normalizado
+    prefixo: "2. ficha"
+    sob: pasta_semanal_raiz
+    nota: "NÃO alimenta o v3 (P-08). Apenas registrar no manifest."
+
+  pasta_fotos:
+    resolver_por: igual_normalizado
+    valores: ["3. fotos"]
+    sob: pasta_semanal_raiz
+    padrao_subpasta_data: '^\d{2}[-_]\d{2}[-_]\d{2}$'
+    nota_padrao: "aceita separador '-' OU '_' (NN-NN-NN e NN_NN_NN); prefixo 26 = ano 2026"
+
+  pasta_diario_obras:
+    resolver_por: prefixo_normalizado
+    prefixo: "4. di"
+    sob: pasta_semanal_raiz
+    subpastas:
+      assinado:
+        resolver_por: prefixo_normalizado
+        prefixo: "diario de obra digital assinado"
+        # R1 (bug 5): typo real no SharePoint da RD102A ("Dario de obra digital assinado")
+        regex: '^d[ai]+rio de obra digital assinado'
+      fisico:
+        resolver_por: prefixo_normalizado
+        prefixo: "diario de obra fisico"
+    padrao_arquivo_periodo: '^(?P<inicio>\d{4}-\d{2}-\d{2}) a (?P<fim>\d{4}-\d{2}-\d{2}) - .*\.pdf$'
+
+  pasta_relatorios_semanais:
+    resolver_por: prefixo_normalizado
+    prefixo: "5. relat"
+    sob: pasta_semanal_raiz
+
+  pasta_semana:
+    resolver_por: glob_regex
+    regex: '^(?P<inicio>\d{4}\.\d{2}\.\d{2})-(?P<fim>\d{4}\.\d{2}\.\d{2})\s+(?P<numero>\d+)[ºo°]?\s*Relat'
+    sob: pasta_relatorios_semanais
+    nota: "algumas pastas-semana têm ambas as datas invertidas no nome; usar min/max, não posição"
+
+  pasta_arquivos_auxiliares:
+    resolver_por: igual_normalizado
+    valores: ["arquivos auxiliares"]
+    sob: pasta_semana
+    nota: "RD103 grafa 'Arquivos Auxiliares' (A maiúsculo); as outras 3, 'Arquivos auxiliares'. Resolvido por igualdade normalizada."
+
+  golden_docx:
+    resolver_por: glob_regex
+    regex: '^RO_(?P<numero>\d{3})\.(?P<revisao>\d+)\s*-\s*RD-?\s?\d+A?\.docx$'
+    sob: pasta_semana
+    aviso: "GOLDEN — proibido como fonte de dado (ver assert_nao_e_golden)"
+
+  golden_pdf:
+    resolver_por: glob_regex
+    regex: '^RO_(?P<numero>\d{3})\.(?P<revisao>\d+)\s*-\s*RD-?\s?\d+A?\.pdf$'
+    sob: pasta_semana
+    aviso: "GOLDEN — proibido como fonte de dado (ver assert_nao_e_golden)"
+
+  pasta_ambiental_sst:
+    resolver_por: prefixo_normalizado
+    prefixo: "6. acompanhamento ambiental"
+    sob: pasta_gestao_tecnica
+    subpasta_visita:
+      resolver_por: glob_regex
+      regex: '^\d{4}-\d{2}-\d{2}$'
+    subpastas_fixas: ["Parecer"]
+    ficha_ambiental:
+      resolver_por: prefixo_normalizado
+      prefixo: "ficha de acompanhamento ambiental"
+      padrao_arquivo: '^FA-\d{3}(\.\d+)?\s*-\s*Ficha acompanhamento ambiental.*\.pdf$'
+    ficha_sst:
+      resolver_por: prefixo_normalizado
+      prefixo: "ficha de acompanhamento sst"
+      padrao_arquivo: '^FA-\d{3}(\.\d+)?\s*-\s*Ficha acompanhamento SST.*\.pdf$'
+    parecer_padrao_arquivo: '^PA-\d{3}\s*-?\s*Parecer\.pdf$'
+
+  pasta_ata_reuniao:
+    resolver_por: prefixo_normalizado
+    prefixo: "9. ata de reuni"
+    # R1 (bug 3): a numeracao varia por obra (RD104 "9.", RD101/RD102A "8. Atas de Reunioes")
+    regex: '^\d+\.\s*atas?\s+de\s+reuni'
+    sob: pasta_gestao_tecnica
+    padrao_arquivo: '^AT-\d{3}(\.\d+)?\s*-\s*Ata de Reuni[aã]o\s*-\s*(?P<data>\d{4}-\d{2}-\d{2})\.pdf$'
+
+# -----------------------------------------------------------------------------
+# ARQUIVOS AUXILIARES — dentro de pasta_arquivos_auxiliares
+# -----------------------------------------------------------------------------
+auxiliares:
+  ficha_acumulada:
+    resolver_por: prefixo_normalizado
+    prefixo: "ficha de campo acumulada"
+    # R1 (bug 6): aceita prefixo "Copia de " (RD102A)
+    regex: '^(copia de )?ficha de campo acumulada'
+    extensoes: [".xlsx"]
+
+  grafico_avanco:
+    resolver_por: igual_normalizado
+    valores: ["grafico - avanco global"]
+    extensoes: [".xlsx"]
+    abas_esperadas: ["Relatório Semanal", "Acumulado"]
+
+  relatorio_fotografico:
+    resolver_por: prefixo_normalizado
+    prefixo: "relatorio fotografico"
+    extensoes: [".xlsx"]
+
+  unifilar_semana:
+    resolver_por: prefixo_normalizado
+    prefixo: "unifilar"
+    extensoes: [".xlsx"]
+
+  prog_avanco_semana:
+    resolver_por: prefixo_normalizado
+    prefixo: "[programa] avanco global de obra"
+    extensoes: [".xlsx"]
+    aba_por_obra: 'Avanço Global - {pasta_obra}'
+    celulas: {global_concluido: C3, global_concluido_atacado: C7}
+
+# -----------------------------------------------------------------------------
+# FONTES CORPORATIVAS — compartilhadas pelas 4 obras
+# -----------------------------------------------------------------------------
+corporativas:
+  nc_tracker:
+    caminho: "{base_obras}\\02_Acompanhamento de NC automatizada.xlsm"
+    aba: VISAO_GERAL
+    tabela: Tbl_VISAO
+    colunas_chave: {rodovia: Rodovia, data_abertura: "Data de Abertura",
+                    data_encerramento: "Data de Encerramento", status: "Status ",
+                    irregularidade: "Irregularidade ", documento: Documento}
+    dominio_status_fonte: "LISTAS_VALIDACAO!I1:I7"
+
+  # Fase 3.4 (v0.2), SOURCE FIX -- decisao registrada, evidencia completa em
+  # docs/fontes/acompanhamento_ambiental.md Sec.6 ("A planilha correta e' a
+  # da RAIZ, apesar do mtime mais velho"). Resumo:
+  #   - mtime do arquivo (SO): raiz = 2026-05-13 (velho); copias de
+  #     `5. Relatorio Mensal da Obra\RM-012.1\...\04_Acompanhamento - Licença
+  #     Ambiental.xlsx` (com cedilha, 4 obras) = 2026-09-02 (mais novo).
+  #   - CONTEUDO (o que importa): as 3 copias RM inspecionadas (RD101, RD103,
+  #     RD104) tem CONTEUDO IDENTICO entre si e sao um SUBCONJUNTO ESTRITO da
+  #     raiz -- todo numero de Licenca da copia RM existe na raiz, e a raiz
+  #     tem 6 licencas ATIVAS ("Vigente") que a copia RM nao tem, incluindo
+  #     uma emitida em 2026-02-19 (Outorga RD-103, no 2026550) -- posterior a
+  #     qualquer coisa que uma copia "congelada em maio" poderia conter, e
+  #     ainda assim ausente das copias RM "de setembro". Ou seja, o mtime do
+  #     SO da copia RM reflete quando ela foi COPIADA para a pasta do
+  #     relatorio mensal, nao quando seu CONTEUDO de Licencas/Condicionantes
+  #     foi atualizado -- e' um template estatico recopiado todo mes, nao uma
+  #     planilha viva.
+  #   - Estrutura: a raiz tem as mesmas 4 abas que o dashboard_ambiental_
+  #     powerbi.md aponta como fonte do Power BI (Dashboard/Empresas/
+  #     Licencas/Condicionantes) e o MESMO NOME DE ARQUIVO citado la
+  #     ("04_Acompanhamento - Licenca Ambiental.xlsx", sem cedilha). As
+  #     copias RM tem 2 abas a mais (graficos-FA, graficos-licenciamento) --
+  #     estrutura DIFERENTE, feita para alimentar o relatorio MENSAL, nao o
+  #     semanal.
+  #   - Nenhuma das duas bate com os numeros do Power BI vistos ao vivo em
+  #     2026-09-17/18 (RD-103: raiz da' 6 licencas/45 condicionantes, RM da'
+  #     3/42, PBI mostra 9/44) -- SOURCE_LIMITATION continua valendo (o PBI
+  #     le uma copia que atualiza continuamente e nao existe localmente),
+  #     mas a raiz e' a fonte MAIS COMPLETA e MAIS PROXIMA da estrutura
+  #     documentada do PBI entre as candidatas inspecionadas, entao e' a
+  #     ficada.
+  #   - NAO trocar para as copias RM: sao 42 replicas por obra/mes do mesmo
+  #     template desatualizado, nao uma fonte unica e viva.
+  licenca_ambiental:
+    caminho: "{base_obras}\\04_Acompanhamento - Licenca Ambiental.xlsx"
+
+  unifilar_com_nc:
+    caminho: "{compartilhado}\\UNIFILAR (com não conformidades)\\UNIFILAR {pasta_obra_num}.xlsx"
+    nota: "pasta 'UNIFILAR OBSOLETO' na mesma raiz — sempre excluída pela regra de exclusão"
+
+  prog_avanco_mestre:
+    caminho: "{compartilhado}\\[Programa] Avanço Global de Obra.xlsx"
+    nota: "mestre; o snapshot usado para progress.* é o da pasta da semana (auxiliares.prog_avanco_semana)"
+
+# -----------------------------------------------------------------------------
+# PADRÃO DA FICHA DE CAMPO DIÁRIA (aba 'FICHA CAMPO')
+#
+# ATENÇÃO — CONTRADIÇÃO COM A SPEC (docs/arquitetura/FASE3_SLICE_1_2_SPEC.md §2):
+# a spec descreve a tabela de serviços como iniciando na linha 24/25, colunas
+# B,C,D / E,F,G / H / I / J / L / M / O / AC. A verificação DIRETA do arquivo
+# real desta semana (RD103, 2026-09-04 Ficha de Campo RD 103.xlsx, aba
+# 'FICHA CAMPO') mostra outra coisa: cabeçalho na LINHA 21, dados a partir da
+# LINHA 22, e colunas B/C/D (estaca inicial) · E/F/G (estaca final) · H (lado) ·
+# J (extensão km) · K (serviço) · M (situação) · O (foto) · Q (descrição) ·
+# X (observação). Isso bate com docs/mapeamento/06_fontes_dados.md (mais antigo)
+# e NÃO com a spec nova. Usar os valores abaixo (verificados) — reportado como
+# divergência, não corrigido silenciosamente na spec.
+# -----------------------------------------------------------------------------
+ficha_campo_diaria:
+  aba: "FICHA CAMPO"
+  clima:
+    linha_rotulos: 16
+    linha_marca: 17
+    rotulos_esperados: {Bom: Bom, Chuvoso: Chuvoso, Impraticável: Impraticável}
+    resolver_por: "varrer a linha 17 nas mesmas colunas da linha 16; a coluna com 'X' define o clima"
+  tabela_servicos:
+    resolver_cabecalho_por: "varrer linhas 1-40 procurando a célula cujo texto normalizado é 'estaca i'"
+    linha_cabecalho_verificada: 21
+    linha_dados_inicial_verificada: 22
+    colunas_por_rotulo_normalizado:
+      "estaca i": {campo: estaca_inicial, largura: 3}   # 3 colunas: km, separador, metros
+      "estaca f": {campo: estaca_final, largura: 3}
+      "lado": {campo: lado, largura: 1}
+      "extensao (km)": {campo: extensao_km, largura: 1}
+      "servico": {campo: servico_codigo, largura: 1}
+      "situacao": {campo: situacao, largura: 1}
+      "foto": {campo: foto, largura: 1}
+      "descricao": {campo: descricao, largura: 1}
+      "observacao": {campo: observacao, largura: 1}
+    condicao_de_parada: "primeira linha em que a coluna 'servico' está vazia"
+
+# -----------------------------------------------------------------------------
+# RELATÓRIO FOTOGRÁFICO — regra de seleção de aba -> subseção 5.2.x
+# (T-17, CONFIRMADO POR CRUZAMENTO DE FONTES — ver services_taxonomy.yaml)
+# -----------------------------------------------------------------------------
+relatorio_fotografico:
+  regra_subsecao: "aba com sheet_state == 'visible' E ao menos uma célula com imagem-na-célula (marcador vm= no XML da planilha, xl/richData)"
+  mecanismo_deteccao: "contar ocorrências do atributo vm=\"N\" nas células <c> do XML da aba (openpyxl não expõe imagem-na-célula; é preciso ler o XML)"

@@ -1,0 +1,259 @@
+# =============================================================================
+# report_versions.yaml — versionamento do formato do Relatório Semanal
+#
+# Resolve P-07 e o requisito de schema configurável.
+#
+# PRINCÍPIO (decisão da Emmily):
+#   CURRENT = formato concluído mais recente = autoridade para geração futura.
+#   HISTORICAL = serve para aprender, identificar exceções e validar a evolução.
+#                NUNCA deve ser reproduzido cegamente.
+#
+#   O relatório em elaboração (sem PDF) NÃO é autoridade.
+#
+# A estrutura das seções mora AQUI, não no código. Se a Emmily disser
+# "volta com o Desvio de Cronograma", basta acrescentar a seção na versão
+# corrente (ou criar uma v4) — sem tocar no motor.
+# =============================================================================
+
+meta:
+  versao_do_arquivo: 1
+  gerado_em: 2026-09-16
+  resolve: [P-07]
+  regra_de_autoridade: "formato concluído mais recente"
+
+# -----------------------------------------------------------------------------
+# REGIMES DE CALENDÁRIO (independentes do formato do documento)
+# -----------------------------------------------------------------------------
+calendario:
+  cal_v2:
+    id: cal_v2
+    status: active
+    effective_from: 2026-01-03
+    dia_inicio: sabado
+    dia_fim: sexta
+    dias: 7
+    validado: "144/144 semanas (tests/test_regras_periodo.py)"
+    confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+  cal_v1:
+    id: cal_v1
+    status: historical
+    effective_from: 2025-09-10
+    effective_until: 2026-01-02
+    dia_inicio: sexta
+    dia_fim: quinta
+    dias: 7
+    observacao: >
+      Regime de implantação, muito irregular: semanas de 8 e de 15 dias,
+      3 pastas com datas invertidas no nome. A transição para cal_v2 se deu por
+      uma semana-pivô de 8 dias (2025-11-21 sex → 2025-11-28 sex).
+    confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+
+# -----------------------------------------------------------------------------
+# VERSÕES DO FORMATO DO DOCUMENTO
+# -----------------------------------------------------------------------------
+report_versions:
+
+  # ---------------------------------------------------------------------------
+  v3:
+    id: v3
+    status: active                     # <<< CURRENT
+    effective_from: 2026-08-01
+    effective_until: null
+    n_secoes: 11
+    calendario: cal_v2
+    descricao: >
+      Modelo vigente. A seção "DESVIO DE CRONOGRAMA" foi removida em 2026-08-01
+      nas quatro obras simultaneamente, e todas as seções seguintes foram
+      renumeradas (12 → 11 seções).
+    confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+    evidencia: "tests/test_regras_anexos.py regra A3 — 52/52"
+    secoes:
+      - {n: 1,  id: apresentacao,      titulo: "APRESENTAÇÃO"}
+      - {n: 2,  id: ficha_acompanhamento, titulo: "FICHA DE ACOMPANHAMENTO"}
+      - {n: 3,  id: avanco_global,     titulo: "AVANÇO GLOBAL DA OBRA"}
+      - {n: 4,  id: unifilar,          titulo: "DIAGRAMA UNIFILAR"}
+      - {n: 5,  id: execucao_obra,     titulo: "EXECUÇÃO DE OBRA"
+         , subsecoes: [
+             {n: "5.1", id: clima,       titulo: "Condições climáticas do período"},
+             {n: "5.2", id: fotografico, titulo: "Relatório Fotográfico", dinamica: true}]}
+      - {n: 6,  id: ambiental,         titulo: "ACOMPANHAMENTO AMBIENTAL"}
+      - {n: 7,  id: diario_obras,      titulo: "DIÁRIO DE OBRAS"}
+      - {n: 8,  id: nao_conformidades, titulo: "ACOMPANHAMENTO DE NÃO CONFORMIDADES"
+         , subsecoes: [
+             {n: "8.1", id: nc_prog,     titulo: "Não conformidades emitidas pelo Programa no período"},
+             {n: "8.2", id: nc_orgao,  titulo: "Não conformidades emitidas pela Órgão Contratante no período"},
+             {n: "8.3", id: nc_historico, titulo: "Histórico de não conformidades emitidas e não concluídas"}]}
+      - {n: 9,  id: interferencias,    titulo: "RELATO DE RISCOS E INTERFERÊNCIAS EM CAMPO"}
+      - {n: 10, id: termo_encerramento, titulo: "TERMO DE ENCERRAMENTO"}
+      - {n: 11, id: anexos,            titulo: "ANEXOS"}
+    anexos:
+      fixos:
+        - {id: diagrama_unifilar, posicao: penultimo, paginas: 1}
+        - {id: diario_de_obras,   posicao: ultimo,    paginas: 7}
+      condicionais:
+        - {id: ata_reuniao,       condicao: "houve reunião no período"}
+        - {id: parecer_tecnico,   condicao: "irregular — não segue o ciclo quinzenal"}
+        - {id: acomp_ambiental,   condicao: "quinzenal: (data_inicio - 2026-06-06) mod 14 == 0"}
+        - {id: acomp_sst,         condicao: "sempre junto com acomp_ambiental"}
+        - {id: nao_conformidade,  condicao: "NC emitida dentro do período"}
+    papeis:
+      # DISCOVERY_CORRECTION (Fase 3.2B, P0.1): `corpo` e `fotografico` SÃO
+      # seções reais do document.xml do Word (9 seções no golden, todas A4/A3
+      # retrato). `diario` e `unifilar` NÃO existem como seção do Word --
+      # são PDFs externos, mesclados DEPOIS da exportação DOCX -> PDF
+      # (pdf_producer do golden = iLovePDF), sem cabeçalho e sem número de
+      # página do relatório. O papel A2/A0 abaixo é verdadeiro para o PDF
+      # FINAL, nunca para uma seção do .docx. Ver config/annex_types.yaml
+      # (integration_mode) e docs/visual_review/VISUAL_DIFF_MASTER.md §C1.
+      corpo: "A4 retrato"                                    # seção real do Word
+      fotografico: "A3 retrato"                               # seção real do Word
+      diario: "A2 paisagem"                                   # PDF externo mesclado (MERGED_PDF) -- não é seção do Word
+      unifilar: "A0 paisagem (A3 paisagem na RD-102A)"        # PDF externo mesclado (MERGED_PDF) -- não é seção do Word
+
+  # ---------------------------------------------------------------------------
+  v2:
+    id: v2
+    status: historical
+    effective_from: 2026-05-30
+    effective_until: 2026-07-25
+    n_secoes: 12
+    calendario: cal_v2
+    descricao: >
+      Modelo com a seção 6 "DESVIO DE CRONOGRAMA" e o anexo
+      "Desvio de cronograma acumulado". Todas as seções a partir da 6 têm
+      numeração deslocada em +1 em relação ao modelo vigente.
+    confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+    evidencia: "índices de RD101 nº43, RD103 nº43, RD104 nº38 (julho/2026)"
+    diferencas_para_v3:
+      - "seção 6 = DESVIO DE CRONOGRAMA (inexistente na v3)"
+      - "ACOMPANHAMENTO AMBIENTAL = 7 (v3: 6)"
+      - "DIÁRIO DE OBRAS = 8 (v3: 7)"
+      - "ACOMPANHAMENTO DE NÃO CONFORMIDADES = 9 (v3: 8)"
+      - "RELATO DE ... = 10 (v3: 9)"
+      - "TERMO DE ENCERRAMENTO = 11 (v3: 10)"
+      - "ANEXOS = 12 (v3: 11)"
+      - "anexo adicional 'Desvio de cronograma acumulado', entre unifilar e diário"
+
+  # ---------------------------------------------------------------------------
+  v1:
+    id: v1
+    status: historical
+    effective_from: 2025-09-10
+    effective_until: 2026-05-23
+    n_secoes: 11
+    calendario: [cal_v1, cal_v2]
+    descricao: >
+      Modelo anterior à criação da seção "DESVIO DE CRONOGRAMA". Tinha 11 seções,
+      como a v3, mas coincidência de contagem NÃO significa identidade — as
+      diferenças ainda estão sendo levantadas pela varredura do corpus histórico.
+    confianca: FORTE INFERÊNCIA
+    evidencia: "índice de RD101 nº34 (2026-05-23) e RD102A nº35 — 11 seções, sem desvio"
+    pendente: "detalhamento pelo scripts/13_corpus_historico.py"
+
+# -----------------------------------------------------------------------------
+# RESOLUÇÃO DE VERSÃO
+# -----------------------------------------------------------------------------
+resolucao:
+  regra: "a versão aplicável é aquela cujo intervalo [effective_from, effective_until]
+          contém a data_inicio do período do relatório"
+  padrao_se_indeterminado: v1
+  nota: >
+    O validador usa esta tabela para NÃO reprovar um relatório de 2025 por seguir
+    corretamente o formato de 2025. Testes do CURRENT representam o padrão correto
+    atual — não tudo o que já apareceu no passado.
+
+# -----------------------------------------------------------------------------
+# VIGÊNCIA DAS REGRAS DE VALIDAÇÃO
+#
+# Cada característica do documento nasceu numa data. Antes dela, a regra não se
+# aplica e o validador devolve N/A — não FAIL.
+#
+# As datas abaixo foram DESCOBERTAS pela própria validação do corpus (177
+# relatórios): para cada regra, a data a partir da qual ela passa a valer em
+# 100% dos casos. CONFIRMADO POR EVIDÊNCIA DIRETA.
+# -----------------------------------------------------------------------------
+vigencia_das_regras:
+  V1:  {desde: 2026-01-03, o_que_nasceu: "calendário sábado→sexta estável"}
+  V2:  {desde: 2026-01-03, o_que_nasceu: "numeração ancorada e contínua"}
+  V3:  {desde: 2025-09-10, o_que_nasceu: "campo PERÍODO na capa"}
+  V4:  {desde: 2025-09-10, o_que_nasceu: "campo Relatório na capa"}
+  V5:  {desde: 2026-05-30, o_que_nasceu: "Diário de Obras anexado em A2 paisagem (as 4 obras migraram nesta semana)"}
+  V6:  {desde: 2026-08-01, o_que_nasceu: "unifilar volta a ser a única página em formato grande (a v2 anexava o Desvio de Cronograma também em formato grande)"}
+  V7:  {desde: 2026-04-25, o_que_nasceu: "Relatório Fotográfico em página A3 retrato"}
+  V8:  {desde: 2025-09-10, o_que_nasceu: "Termo de Encerramento declarando o nº de páginas"}
+  V9:  {desde: 2025-09-10, o_que_nasceu: "data de emissão no Termo"}
+  V10: {desde: 2025-09-10, o_que_nasceu: "tabela climática"}
+  V11: {desde: 2026-05-30, o_que_nasceu: "ordem estável dos anexos"}
+  V12: {desde: 2026-05-30, o_que_nasceu: "ciclo quinzenal do bloco ambiental"}
+  V13: {desde: 2026-05-30, o_que_nasceu: "ambiental e SST acoplados"}
+  V14: {desde: 2025-09-10, o_que_nasceu: "regra por versão de formato"}
+  V15: {desde: 2025-09-10, o_que_nasceu: "estrutura numerada de seções"}
+
+# -----------------------------------------------------------------------------
+# VERSIONAMENTO DE REVISÕES DO MESMO RELATÓRIO
+# Derivado das 5 revisões `.2` do acervo. Ver docs/mapeamento/REVISOES_E_VERSIONAMENTO.md
+# CONFIRMADO POR EVIDÊNCIA DIRETA (5/5), testado em tests/test_regras_revisao.py
+# -----------------------------------------------------------------------------
+revisoes:
+  regra_vigente: "o relatório vigente de uma semana é a MAIOR revisão presente na
+                  RAIZ da pasta-semana"
+  regra_obsoleto: "revisões anteriores ficam em subpasta cujo nome contém 'obsoleto',
+                   guardando APENAS o PDF"
+  corrige: "D-08 — 'concluído ⇔ existe PDF' era incompleto: um .1 dentro de Obsoleto
+            também é um PDF na pasta"
+  nome_pasta_semana: "não muda na revisão"
+  subpasta_obsoletos:
+    padrao: "Relatório Semanal (Obsoleto)"
+    variantes_observadas: ["Relatório Semanal (Obsoleto)", "Obsoleto"]
+    nota: "a RD-103 usa 'Obsoleto'; padronizar na automação"
+  marcacao_na_capa:
+    observada_em: "RD-101 nº 31"
+    formato: "Relatório: {NNN} v.{rev}"
+    nota_de_motivo: "v.01: Considerando a atualização da 2. Ficha de Campo e 4. Diagrama Unifilar."
+    recomendacao: "tornar obrigatória — hoje só uma das 5 revisões declara o motivo"
+  data_do_termo_na_revisao:
+    comportamento_atual: "NÃO é atualizada — permanece a da emissão original"
+    classificacao: "erro herdado"
+    recomendacao: "atualizar para a data de emissão da revisão"
+  tipos_observados:
+    editorial:
+      n_casos: 3
+      exemplo: "lote de 15/05/2026 — 8 linhas idênticas nas 3 obras, na seção ambiental"
+      similaridade: 0.996
+    dados:
+      n_casos: 2
+      exemplo: "RD-101 nº 31 e RD-103 nº 41 — atualização da Ficha de Campo e do Unifilar"
+      similaridade: "0,758 a 0,813"
+  revisao_maxima_observada: 2
+  quem_decide_revisar: HITL
+
+# -----------------------------------------------------------------------------
+# EXCEÇÕES CONHECIDAS E LEGÍTIMAS
+# Situações reais do processo que NÃO são erro — o validador deve avisar,
+# não reprovar.
+# -----------------------------------------------------------------------------
+excecoes_legitimas:
+
+  diario_em_atraso:
+    regra_afetada: V5
+    descricao: >
+      Quando o Diário de Obras de uma semana não chega assinado pela empresa
+      executora a tempo, ele é anexado ao relatório SEGUINTE, junto com o da
+      semana corrente. O relatório então traz 14 páginas A2 (2 × 7) em vez de 7.
+    evidencia_textual: >
+      RD-101 nº 48, seção 7: "Contudo, até a data de sua emissão, o referido
+      documento não havia sido formalmente assinado pela empresa executora.
+      Dessa forma, o Diário de Obras segue apresentado sem a devida anuência da
+      construtora, sendo que a versão devidamente assinada será encaminhada e
+      anexada ao relatório subsequente."
+    ocorrencias: [RD102A_037, RD103_037, RD101_039, RD101_046, RD102A_047]
+    confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+    tratamento: "WARNING, não FAIL. Aceitar múltiplos de 7 páginas A2."
+
+  diario_incompleto:
+    regra_afetada: V5
+    descricao: "Diário com menos páginas que os dias do período."
+    ocorrencias: [RD101_043]
+    detalhe: "RD-101 nº 43 (25–31/07/2026): 6 páginas A2 para 7 dias."
+    confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+    tratamento: "WARNING — insumo faltante, merece verificação humana."

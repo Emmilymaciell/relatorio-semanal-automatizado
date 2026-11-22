@@ -1,0 +1,456 @@
+# =============================================================================
+# report_schema.yaml — modelo canônico do Relatório Semanal de Acompanhamento
+#                      de Obras do Programa
+#
+# DESCOBERTO a partir dos 8 relatórios da amostra (regime vigente), não imposto.
+# Este é o contrato de dados que o futuro motor de automação vai preencher.
+#
+# classe: A=fixo  B=por obra  C=determinístico  D=extraído  E=IA/template
+#         F=manual  G=anexo
+# confianca: CONFIRMADO | ALTA | PROVAVEL | HIPOTESE | DESCONHECIDO
+#
+# ⚠️ Versão 1 — produzida na fase 2 (análise interna dos relatórios).
+#    Os campos `fonte:` ainda são hipóteses; serão preenchidos na fase 3.
+# =============================================================================
+
+meta:
+  versao: 2
+  gerado_em: 2026-09-17
+  baseline: discovery-v2
+  fase: descoberta concluida e validada
+  amostra: 8 relatórios (RD-101 47/48, RD-102A 48/49, RD-103 48/49, RD-104 42/43)
+
+# -----------------------------------------------------------------------------
+# CHAVE DO DOCUMENTO
+# -----------------------------------------------------------------------------
+identificacao:
+  obra:            {classe: B, confianca: CONFIRMADO}
+  numero:          {classe: C, confianca: CONFIRMADO,
+                    regra: "(data_inicio - ancora_da_obra)/7 + 1", formato: "%03d"}
+  revisao:         {classe: C, confianca: ALTA, valor_observado: 1,
+                    nota: "revisão .2+ não observada na amostra"}
+  data_inicio:     {classe: C, confianca: CONFIRMADO, regra: "sábado"}
+  data_fim:        {classe: C, confianca: CONFIRMADO, regra: "data_inicio + 6 dias (sexta)"}
+  data_emissao:    {classe: C, confianca: CONFIRMADO,
+                    regra: "data da exportação do PDF; igual nas 4 obras (produção em lote)"}
+  nome_arquivo:    {classe: C, confianca: CONFIRMADO,
+                    padrao: "RO_{numero:03d}.{revisao} - {rodovia}.{ext}"}
+
+# -----------------------------------------------------------------------------
+# ESTRUTURA — 11 seções invariantes
+# -----------------------------------------------------------------------------
+estrutura:
+
+  capa:
+    classe: [A, B, C]
+    confianca: CONFIRMADO
+    papel: A4 retrato
+    campos:
+      titulo:              {classe: A, valor: "RELATÓRIO SEMANAL DE ACOMPANHAMENTO DE OBRAS"}
+      rodovia:             {classe: B, fonte: road_registry.rodovia}
+      trecho:              {classe: B, fonte: road_registry.trecho}
+      extensao:            {classe: B, fonte: road_registry.extensao_texto}
+      codigo_sre:          {classe: B, fonte: road_registry.codigo_sre, cardinalidade: "1..2"}
+      lote:                {classe: B, fonte: road_registry.lote}
+      empresa_executora:   {classe: B, fonte: road_registry.empresa_executora_capa}
+      empresa_supervisora: {classe: B, fonte: road_registry.empresa_supervisora}
+      numero_relatorio:    {classe: C}
+      periodo_texto:       {classe: C, formato: "{dd/mm/aaaa} a {dd/mm/aaaa}"}
+      logos:               {classe: A, quantidade: 2}
+
+  indice:
+    classe: C
+    confianca: CONFIRMADO
+    papel: A4 retrato
+    nota: "numeração 1–11 invariante; subentradas 5.2.x dinâmicas"
+    mecanismo: 'campo TOC \o "1-3" \h \z \u dentro de w:sdt'
+    atualizacao: manual
+    evidencia: "IDs _Toc mudam entre semanas e não há updateFields — a atualização é feita à mão"
+    confianca_mecanismo: CONFIRMADO
+
+  s1_apresentacao:
+    titulo: "APRESENTAÇÃO"
+    classe: [A, B, C, E]
+    confianca: CONFIRMADO
+    paragrafos:
+      - {id: contratual,   classe: A, variaveis: [rodovia, trecho_extenso, extensao, contrato_prog]}
+      - {id: contratacao,  classe: B, variaveis: [instrumento_convocacao, empresa_executora,
+                                                  contrato_obra, contrato_assinado_em,
+                                                  ordem_servico, ordem_servico_em],
+         confianca: PROVAVEL, nota: "verificado só na RD-101"}
+      - {id: periodo,      classe: [C, E], variaveis: [data_inicio, data_fim, servicos_da_semana]}
+      - {id: reunioes,     classe: E, condicional: true,
+         nota: "quando houve reunião, gera anexo 'Ata de Reunião'"}
+
+  s2_ficha_acompanhamento:
+    titulo: "FICHA DE ACOMPANHAMENTO"
+    classe: [G, D]
+    confianca: CONFIRMADO
+    papel: A4 retrato
+    formato_imagem: EMF
+    n_paginas: 1
+    conteudo:
+      figura_1: {classe: G, legenda: "Ficha de andamento físico da obra",
+                 fonte_provavel: "Ficha de Campo Acumulada GO <rodovia>.xlsx",
+                 confianca: ALTA}
+      tabela_estacas:
+        classe: D
+        colunas_observadas: [estaca_inicial, estaca_final, lado, extensao_km, servico,
+                             situacao, foto, descricao, observacao]
+        dominio_situacao:
+          A: Em andamento
+          C: Concluído
+          I: Impedido
+        confianca: CONFIRMADO POR FONTE HUMANA + EVIDÊNCIA DIRETA
+        evidencia: legenda na própria Ficha de Campo, N10:P12, idêntica nas 4 obras
+        resolve: P-04
+
+  s3_avanco_global:
+    titulo: "AVANÇO GLOBAL DA OBRA"
+    classe: [A, G]
+    confianca: CONFIRMADO
+    conteudo:
+      texto:     {classe: A}
+      grafico_1: {classe: G, legenda: "Avanço global da obra",
+                  fonte_provavel: "Gráfico - Avanço Global.xlsx", confianca: PROVAVEL}
+
+  s4_unifilar:
+    titulo: {classe: B, valores: {RD101: UNIFILAR, RD102A: DIAGRAMA UNIFILAR,
+                                  RD103: DIAGRAMA UNIFILAR, RD104: UNIFILAR}}
+    classe: [A, E, G]
+    confianca: CONFIRMADO
+    conteudo:
+      texto_base:      {classe: A, variaveis: [rodovia],
+                        nota: "idêntico palavra por palavra nas 4 obras"}
+      frase_servicos:  {classe: E, variaveis: [servicos_da_semana],
+                        nota: "mesma lista da s1_apresentacao"}
+      tabela_bueiros:  {classe: D, presente_em: [RD101], legenda: "Bueiros projetados"}
+      texto_excepcional: {classe: F, presente_em: [RD102A],
+                          nota: "parágrafo sobre a NC-025; persiste entre semanas"}
+    anexo_vinculado: diagrama_unifilar
+
+  s5_execucao_obra:
+    titulo: "EXECUÇÃO DE OBRA"
+    subsecoes:
+
+      s5_1_clima:
+        titulo: {classe: B, valores: {RD103: "Dados climáticos do período",
+                                      _default: "Condições climáticas do período"}}
+        classe: [A, C, D, E]
+        confianca: CONFIRMADO
+        conteudo:
+          texto_classificacoes: {classe: A,
+                                 dominio: [Bom, Chuvoso, Impraticável]}
+          tabela:
+            classe: [C, D]
+            linhas: [DATA, DIA, CLIMA]
+            colunas: 7
+            campos:
+              DATA:  {classe: C, formato: "dd/mmm"}
+              DIA:   {classe: C, formato: "dia da semana em caixa alta"}
+              CLIMA:
+            classe: D
+            fonte: Ficha de Campo diária, aba FICHA CAMPO
+            celulas: N16/O16/P16 = Bom/Chuvoso/Impraticável; marcação X na linha 17
+            confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+          frase_sem_execucao:
+            classe: C
+            condicional: true
+            exemplo: No dia {data} não houve execução de atividades.
+            regra: um item por dia do período SEM Ficha de Campo; não é regra de domingo
+            confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+            evidencia: ausência simultânea da ficha, da pasta de fotos e do serial de data no fotográfico
+
+      s5_2_fotografico:
+        titulo: "Relatório Fotográfico"
+        classe: [A, C, G]
+        confianca: CONFIRMADO
+        papel: A3 retrato
+        n_paginas: "3..4"
+        nota: "única seção A3 do documento; 1 página comporta 1 ou 2 blocos 5.2.x"
+        conteudo:
+          texto_intro: {classe: A,
+                        valor: "O relatório fotográfico demonstra de forma visual as informações relevantes das atividades desenvolvidas ao longo do trecho."}
+          subsecoes_por_servico:
+            classe: C
+            derivado_de: servicos_da_semana
+            cardinalidade: "3..6"
+            vocabulario_observado:
+              - Terraplenagem
+              - Pavimentação
+              - Drenagem
+              - {termo: OAE, sinonimos: ["Obras de Arte Especiais"]}
+              - {termo: OAC, sinonimos: ["Obras de arte corrente", "Obras de Arte Corrente"]}
+              - Obras Complementares
+            nota: "vocabulário NÃO normalizado nos documentos — pré-requisito de automação"
+          fotos:
+            classe: G
+            fonte: RELATÓRIO FOTOGRÁFICO <numero>.xlsx, uma aba por serviço
+            confianca: CONFIRMADO POR CRUZAMENTO DE FONTES
+            metadados_da_foto:
+              origem: OVERLAY VISUAL impresso na própria fotografia
+              confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+              evidencia: overlay em 30/30 fotos lidas; EXIF vazio em 7/7
+              campos: [data, utm_zone, utm_e, utm_n, estaca_inicial, estaca_final,
+                       servico, rodovia, construtora, indice]
+              indice: ordinal da foto DENTRO DO DIA (1..N), atravessando todos os serviços
+              ligacao_com_a_ficha: o índice cai na faixa da coluna Foto da Ficha de Campo do mesmo dia (13/13)
+              alerta: a pasta de serviço NÃO é classificação confiável; o serviço correto vem de (data, indice)
+            resolve: [P-03, T-04, L-15]
+            legenda: {classe: [C, B], padrao_por_obra: road_registry.legenda_foto}
+
+  s6_ambiental:
+    titulo: "ACOMPANHAMENTO AMBIENTAL"
+    classe: [E, G]
+    confianca: CONFIRMADO
+    periodicidade_declarada: quinzenal
+    conteudo:
+      texto:            {classe: E, variaveis: [parecer_tecnico]}
+      figura_indices:   {classe: G, legenda: "Índices de Acompanhamento Ambiental"}
+      figura_condicionantes: {classe: G, legenda: "Status de Condicionantes Ambientais"}
+      figura_gestao:    {classe: G,
+                         legenda: {classe: B,
+                                   valores: {RD104: "Acompanhamento de Licenças e condicionantes ambientais",
+                                             _default: "Gestão Ambiental"}}}
+      texto_condicionantes_prazo: {classe: E, confianca: PROVAVEL}
+
+  s7_diario_obras:
+    titulo: "DIÁRIO DE OBRAS"
+    classe: [A, B, F, G]
+    confianca: CONFIRMADO
+    conteudo:
+      texto_base:        {classe: A}
+      data_migracao:     {classe: B, fonte: road_registry,
+                          valores: {RD101: 2026-04-25, _default: 2026-04-21}}
+      ressalva_assinatura: {classe: F, condicional: true,
+                            nota: "apareceu na RD-101 nº 48 — diário sem assinatura da executora"}
+    anexo_vinculado: diario_de_obras
+
+  s8_nao_conformidades:
+    titulo: "ACOMPANHAMENTO DE NÃO CONFORMIDADES"
+    subsecoes:
+      s8_1_prog:
+        titulo: {classe: B, valores: {RD103: "Não conformidades emitidas pelo Programa no período",
+                                      _default: "Não conformidades emitidas pela Programa no período"}}
+        classe: [E, D, F]
+        confianca: CONFIRMADO
+        conteudo:
+          frase_negativa: {classe: A, condicao: "nenhuma NC no período"}
+          frase_positiva: {classe: E, condicao: "houve NC"}
+          itens_nc:
+            classe: [D, F]
+            campos:
+              numero: {classe: D, formato: NC-NNN, fonte: VISAO_GERAL!Tbl_VISAO}
+              data:   {classe: D, fonte: VISAO_GERAL coluna H (Data de Abertura)}
+              descricao:
+                classe: D
+                fonte: VISAO_GERAL coluna V (Irregularidade)
+                regra: primeira sentença do campo, sem a cláusula temporal, inicial minúscula,
+                       prefixada por 'NC-NNN Emitida em {data},'
+                confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+                evidencia: template reproduziu 3 de 3 frases com similaridade 1,000
+                nota: era classe F (manual) na v1; agora é extração determinística
+                resolve: P-05
+      s8_2_orgao:
+        classe: A
+        confianca: CONFIRMADO
+        nota: "texto idêntico nos 8; valor sempre 'não houve' — comportamento com NC é DESCONHECIDO"
+      s8_3_historico:
+        classe: [D, G]
+        confianca: CONFIRMADO
+        conteudo:
+          figura_notificacoes: {classe: G, legenda: "Acompanhamento de notificações"}
+          grafico_2: {classe: G, legenda: "Distribuição de NC por status"}
+          grafico_3: {classe: G, legenda: "Distribuição por natureza"}
+          contagens:
+            classe: D
+            fonte: 02_Acompanhamento de NC automatizada.xlsm, VISAO_GERAL!Tbl_VISAO (A3:AA156)
+            chave: coluna E (Status), filtrada por coluna B (Rodovia), cortada na data de fechamento
+            dominio_status: [Aberta, Em Análise, Aguardando Evidências, Encerrada,
+                             Aguardando Projeto Executivo, Cancelada]
+            dominio_fonte: LISTAS_VALIDACAO!I1:I7
+            confianca: CONFIRMADO POR FONTE HUMANA + EVIDÊNCIA DIRETA
+            evidencia: 4/4 exato em 4 obras; total fecha em 7 das 8 seções da amostra
+            alerta: a planilha usa TODAY(); é estado atual, sem histórico semanal
+            resolve: [P-02, T-01]
+
+  s9_interferencias:
+    titulo: {classe: B, fonte: road_registry.titulo_secao_9}
+    classe: [A, E, F]
+    confianca: CONFIRMADO
+    sem_ocorrencia:
+      classe: A
+      ocorrencias: 163
+      nota: cada obra tem sua redação fixa de nao houve; padronizar (GUIA_DE_REDACAO 4.7)
+    com_ocorrencia:
+      classe: [E, D, F]
+      ocorrencias: 10
+      confianca: CONFIRMADO POR EVIDÊNCIA DIRETA
+      distribuicao: {RD101: 5, RD104: 4, RD102A: 1, RD103: 0}
+      anatomia: [abertura_temporal, verbo_de_constatacao, documento_de_origem,
+                 objeto_da_interferencia, localizacao, efeito, remissao_ao_anexo]
+      tipos_de_objeto: [adutora, desapropriacao, postes_de_energia, nascente_em_app,
+                        cerca_danificada, marco_topografico, rede_de_agua]
+      campos_extraiveis: [documento_origem, numero, emissor, data, estaca_inicial,
+                          estaca_final, anexo_vinculado]
+      campos_humanos: [descricao_objeto, efeito, providencia]
+      nota: deixou de ser DESCONHECIDO; ver TEXTOS_E_TEMPLATES.md secao 4
+
+  s10_termo_encerramento:
+    titulo: "TERMO DE ENCERRAMENTO"
+    classe: C
+    confianca: CONFIRMADO
+    automacao: 100
+    template: |
+      O Relatório Semanal de Acompanhamento de Obras da {obra_sem_hifen} – N° {numero},
+      referente à consolidação e à apresentação das atividades desenvolvidas durante o
+      período de {data_inicio} a {data_fim}, no âmbito do Contrato Nº{contrato_obra} –
+      Parceiro X {empresa_executora_contrato}, apresenta-se constituído de {n_paginas}
+      ({n_paginas_por_extenso}) páginas.
+
+      {cidade_emissao}, {data_emissao_por_extenso}.
+    dependencias: [documento_montado]
+    nota: "depende da contagem final de páginas — resolver no fim da pipeline"
+
+  s11_anexos:
+    titulo: "ANEXOS"
+    classe: [C, G]
+    confianca: CONFIRMADO
+    lista:
+      numeracao: romana
+      ordem: "condicionais primeiro, depois os dois fixos"
+    anexos:
+      ata_reuniao:
+        classe: G
+        obrigatorio: false
+        condicao: "houve reunião de alinhamento no período"
+        confianca: PROVAVEL
+        integration_mode: EMBEDDED_IMAGE   # ver config/annex_types.yaml (P0.3)
+      parecer_tecnico:
+        classe: G
+        obrigatorio: false
+        condicao: "semana de fechamento do ciclo ambiental"
+        periodicidade: "quinzenal ou mensal — NÃO RESOLVIDO"
+        numeracao: "PA-NNN, sequencial CORPORATIVA (não por obra)"
+        evidencia: "RD104=252, RD102A=253, RD103=254, RD101=255 na mesma leva"
+        confianca: ALTA
+        integration_mode: EMBEDDED_IMAGE   # ver config/annex_types.yaml (P0.3); golden p17-22, herda cabeçalho/numeração
+      acompanhamento_ambiental:
+        classe: G
+        obrigatorio: false
+        condicao: "junto com o parecer_tecnico"
+        confianca: ALTA
+        integration_mode: EMBEDDED_IMAGE   # golden p23-24, herda cabeçalho/numeração
+      acompanhamento_sst:
+        classe: G
+        obrigatorio: false
+        condicao: "junto com o parecer_tecnico"
+        confianca: ALTA
+        integration_mode: EMBEDDED_IMAGE   # golden p25-26, herda cabeçalho/numeração
+      nao_conformidade:
+        classe: G
+        obrigatorio: false
+        condicao: "NC emitida dentro do período"
+        confianca: CONFIRMADO
+        integration_mode: EMBEDDED_IMAGE   # ver config/annex_types.yaml (P0.3)
+      diagrama_unifilar:
+        classe: G
+        obrigatorio: true
+        posicao: penultimo
+        integration_mode: MERGED_PDF   # ver config/annex_types.yaml (P0.3)
+        papel: {classe: B, valores: {RD102A: "A3 paisagem", _default: "A0 paisagem"}}
+        n_paginas: 1
+        confianca: CONFIRMADO
+        DISCOVERY_CORRECTION: >
+          `papel` é o papel do PDF FINAL mesclado (verdadeiro) -- NÃO é uma seção
+          do Word. O document.xml do golden tem 9 seções, todas A4 ou A3 retrato;
+          não existe seção A0 no DOCX. Esta página entra como PDF externo,
+          mesclado DEPOIS da exportação DOCX -> PDF (pdf_producer do golden =
+          iLovePDF), sem cabeçalho e sem número de página do relatório.
+          Evidência: docs/visual_review/VISUAL_DIFF_MASTER.md §C1 (golden p27,
+          sem logo nem numeração) e GOLDEN_VISUAL_SPEC.md §8. Corrigido na
+          Fase 3.2B, P0.1 (docs/arquitetura/FASE3_2B_RENDERER_V2_SPEC.md).
+      diario_de_obras:
+        classe: G
+        obrigatorio: true
+        posicao: ultimo
+        integration_mode: MERGED_PDF   # ver config/annex_types.yaml (P0.3)
+        papel: "A2 paisagem"
+        n_paginas: 7
+        regra: "uma página por dia do período"
+        confianca: CONFIRMADO
+        nota: "regra de validação forte: n_paginas_A2 == 7 em 8/8 relatórios"
+        DISCOVERY_CORRECTION: >
+          `papel` é o papel do PDF FINAL mesclado (verdadeiro) -- NÃO é uma seção
+          do Word. Idem diagrama_unifilar acima: as 7 páginas A2 (+ 1 página A4
+          do termo do diário) são PDF externo mesclado DEPOIS da exportação
+          DOCX -> PDF, sem cabeçalho e sem número de página do relatório.
+          Evidência: VISUAL_DIFF_MASTER.md §C1 (golden p28-35, sem logo nem
+          numeração). Corrigido na Fase 3.2B, P0.1.
+
+# -----------------------------------------------------------------------------
+# VARIÁVEIS DERIVADAS — calculadas, não digitadas
+# -----------------------------------------------------------------------------
+derivadas:
+  servicos_da_semana:
+    classe: C
+    derivado_de: fotos_da_semana
+    confianca: ALTA
+    alimenta: [s1_apresentacao.periodo, s4_unifilar.frase_servicos, s5_2.subsecoes_por_servico]
+    nota: "um único dado alimenta três lugares do documento"
+  numeracao_figuras:
+    classe: C
+    sequencias_independentes: [Figura, Gráfico, Tabela]
+    confianca: CONFIRMADO
+    mecanismo: "DIGITADA À MÃO — só 1 legenda por documento usa campo SEQ; as outras 4–15 são texto"
+    confianca_mecanismo: CONFIRMADO
+    risco: "o número aparece também no texto corrido; já há divergência entre RD-102A nº48 e nº49"
+
+  n_paginas:
+    classe: C
+    confianca: CONFIRMADO
+    nota: "conhecido só após montar o documento com todos os anexos"
+  n_paginas_por_extenso:
+    classe: C
+    confianca: CONFIRMADO
+    exemplos: {27: "vinte e sete", 39: "trinta e nove", 25: "vinte e cinco"}
+
+# -----------------------------------------------------------------------------
+# REGRAS DE VALIDAÇÃO — testáveis sobre o documento pronto
+# -----------------------------------------------------------------------------
+validacoes:
+  # NOTA (DISCOVERY_CORRECTION, P0.1): V1 e V2 avaliam o PDF FINAL (após o
+  # merge com os anexos MERGED_PDF), nunca o número de seções do .docx --
+  # o Word não tem seção A2 nem A0/A3(unifilar). Ver config/annex_types.yaml.
+  - id: V1
+    regra: "paginas com papel 'A2 paisagem' == 7"
+    base: "8/8 relatórios da amostra"
+    escopo: "PDF final mesclado (diario_de_obras, integration_mode=MERGED_PDF) -- não é seção do .docx"
+  - id: V2
+    regra: "paginas com papel A0/A3 paisagem (unifilar) == 1"
+    base: "8/8"
+    escopo: "PDF final mesclado (diagrama_unifilar, integration_mode=MERGED_PDF) -- não é seção do .docx"
+  - id: V3
+    regra: "n_paginas declarado no Termo de Encerramento == n_paginas real do PDF"
+    base: "8/8"
+  - id: V4
+    regra: "quantidade de subsecoes 5.2.x == quantidade de servicos citados na s1 e na s4"
+    base: "8/8"
+  - id: V5
+    regra: "os dois ultimos anexos sao 'Diagrama Unifilar' e 'Diário de Obras', nessa ordem"
+    base: "8/8"
+  - id: V6
+    regra: "tabela climatica tem exatamente 7 colunas, de sabado a sexta"
+    base: "8/8"
+  - id: V7
+    regra: "data_emissao do termo == data de exportacao do PDF"
+    base: "8/8"
+
+# -----------------------------------------------------------------------------
+# LACUNAS CONHECIDAS — o que este schema ainda NÃO sabe
+# -----------------------------------------------------------------------------
+desconhecido:
+  - de onde vem o número digitado em UNIFILAR G/H (entrada humana anterior ao gerador)
+  - comportamento da seção 8.2 se a Órgão Contratante emitir NC (133/133 negativas, sem precedente)
+  - comportamento numa revisão .3 (nunca ocorreu; a regra já é genérica em rev)
+  - critério editorial de qual foto representa melhor o serviço (por desenho: HITL)
